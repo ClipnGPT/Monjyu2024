@@ -150,7 +150,6 @@ cython_debug/
 *ClipnGPT*.*
 *secret.*
 
-_config/
 _cv2data/
 _extensions/
 temp/
