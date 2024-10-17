@@ -60,7 +60,7 @@ import socket
 qHOSTNAME = socket.gethostname().lower()
 
 use_openai_list   = ['kondou-latitude', 'kondou-main11', 'kondou-sub64', 'repair-surface7', 'surface-pro7', 'a-zip神戸会議用sf', ]
-#not_feedback_list = ['kondou-latitude', 'kondou-main11', 'kondou-sub64', 'repair-surface7', ]
+not_feedback_list = ['kondou-latitude', 'kondou-main11', 'kondou-sub64', 'repair-surface7', ]
 
 
 
@@ -89,12 +89,12 @@ class _key2STT:
     def start_kb_listener(self):
         self.last_prtScrn_time  = 0
         self.last_prtScrn_count = 0
-        self.last_ctrl_l_time   = 0
-        self.last_ctrl_l_count  = 0
-        self.last_ctrl_l_clip   = ''
-        self.last_ctrl_r_time   = 0
-        self.last_ctrl_r_count  = 0
-        self.last_ctrl_r_clip   = ''
+        self.last_alt_l_time    = 0
+        self.last_alt_l_count   = 0
+        self.last_alt_l_clip    = ''
+        self.last_alt_r_time    = 0
+        self.last_alt_r_count   = 0
+        self.last_alt_r_clip    = ''
         self.last_shift_l_time  = 0
         self.last_shift_l_count = 0
         self.last_shift_r_time  = 0
@@ -113,19 +113,19 @@ class _key2STT:
     def on_press(self, key):
         if   (os.name == 'nt') and (key == keyboard.Key.print_screen):
             pass
-        elif (key == keyboard.Key.ctrl_l)  or (key == keyboard.Key.ctrl_r):
+        elif (key == keyboard.Key.alt_l)  or (key == keyboard.Key.alt_r):
             pass
         elif (key == keyboard.Key.shift_l)   or (key == keyboard.Key.shift_r):
             pass
         else:
             self.last_prtScrn_time  = 0
             self.last_prtScrn_count = 0
-            self.last_ctrl_l_time   = 0
-            self.last_ctrl_l_count  = 0
-            self.last_ctrl_l_clip   = ''
-            self.last_ctrl_r_time   = 0
-            self.last_ctrl_r_count  = 0
-            self.last_ctrl_r_clip   = ''
+            self.last_alt_l_time    = 0
+            self.last_alt_l_count   = 0
+            self.last_alt_l_clip    = ''
+            self.last_alt_r_time    = 0
+            self.last_alt_r_count   = 0
+            self.last_alt_r_clip    = ''
             self.last_shift_l_time  = 0
             self.last_shift_l_count = 0
             self.last_shift_r_time  = 0
@@ -206,26 +206,26 @@ class _key2STT:
                     self.start_kb_listener()
 
         # --------------------
-        # ctrl(l) キー
+        # alt_l キー
         # --------------------
-        elif (key == keyboard.Key.ctrl_l):
+        elif (key == keyboard.Key.alt_l):
             press_time = time.time()
-            if ((press_time - self.last_ctrl_l_time) > 1):
-                self.last_ctrl_l_time  = press_time
-                self.last_ctrl_l_count = 1
+            if ((press_time - self.last_alt_l_time) > 1):
+                self.last_alt_l_time  = press_time
+                self.last_alt_l_count = 1
                 if ((press_time - self.last_copy_time) < 1):
-                    self.last_ctrl_l_clip = self.last_copy_string
-                    print("Press ctrl with clip text ?")
+                    self.last_alt_l_clip = self.last_copy_string
+                    print("Press alt_l key with clip text ?")
             else:
-                self.last_ctrl_l_count += 1
-                if (self.last_ctrl_l_count < 3):
-                    self.last_ctrl_l_time = press_time
+                self.last_alt_l_count += 1
+                if (self.last_alt_l_count < 3):
+                    self.last_alt_l_time = press_time
                 else:
-                    self.last_ctrl_l_time  = 0
-                    self.last_ctrl_l_count = 0
-                    #print("Press ctrl(l) x 3 !")
-                    if (self.last_ctrl_l_clip != ''):
-                        print("Press ctrl with clip ok.")
+                    self.last_alt_l_time  = 0
+                    self.last_alt_l_count = 0
+                    #print("Press alt_l x 3 !")
+                    if (self.last_alt_l_clip != ''):
+                        print("Press alt_l key with clip ok.")
 
                     # キー操作監視 停止
                     self.stop_kb_listener()
@@ -239,7 +239,7 @@ class _key2STT:
                     nowTime  = datetime.datetime.now()
                     stamp    = nowTime.strftime('%Y%m%d.%H%M%S')
                     seq      = '{:04}'.format(self.file_seq)
-                    filename = qPath_stt + stamp + '.' + seq + '.ctrl_l_key.txt'
+                    filename = qPath_stt + stamp + '.' + seq + '.alt_l_key.txt'
 
                     # 音声入力
                     text = ''
@@ -265,9 +265,9 @@ class _key2STT:
                         text  = 'assistant,' + text + '\n'
                         #if(qHOSTNAME not in not_feedback_list):
                         #    text += '結果は要約した内容で音声合成でお願いします。\n'
-                        if (self.last_ctrl_l_clip != ''):
+                        if (self.last_alt_l_clip != ''):
                             text += "''' 補足情報 \n"
-                            text += self.last_ctrl_l_clip + '\n'
+                            text += self.last_alt_l_clip + '\n'
                             text += "''' \n"
 
                         #text  = text
@@ -281,26 +281,26 @@ class _key2STT:
                     self.start_kb_listener()
 
         # --------------------
-        # ctrl(r) キー
+        # alt_r キー
         # --------------------
-        elif (key == keyboard.Key.ctrl_r):
+        elif (key == keyboard.Key.alt_r):
             press_time = time.time()
-            if ((press_time - self.last_ctrl_r_time) > 1):
-                self.last_ctrl_r_time  = press_time
-                self.last_ctrl_r_count = 1
+            if ((press_time - self.last_alt_r_time) > 1):
+                self.last_alt_r_time  = press_time
+                self.last_alt_r_count = 1
                 if ((press_time - self.last_copy_time) < 1):
-                    self.last_ctrl_r_clip = self.last_copy_string
-                    print("Press shift(l) with clip text ?")
+                    self.last_alt_r_clip = self.last_copy_string
+                    print("Press alt_r key with clip text ?")
             else:
-                self.last_ctrl_r_count += 1
-                if (self.last_ctrl_r_count < 3):
-                    self.last_ctrl_r_time = press_time
+                self.last_alt_r_count += 1
+                if (self.last_alt_r_count < 3):
+                    self.last_alt_r_time = press_time
                 else:
-                    self.last_ctrl_r_time  = 0
-                    self.last_ctrl_r_count = 0
-                    #print("Press ctrl(r) x 3 !")
-                    if (self.last_ctrl_r_clip != ''):
-                        print("Press shift(l) with clip ok.")
+                    self.last_alt_r_time  = 0
+                    self.last_alt_r_count = 0
+                    #print("Press alt_r x 3 !")
+                    if (self.last_alt_r_clip != ''):
+                        print("Press alt_r key with clip ok.")
 
                     # キー操作監視 停止
                     self.stop_kb_listener()
@@ -314,7 +314,7 @@ class _key2STT:
                     nowTime  = datetime.datetime.now()
                     stamp    = nowTime.strftime('%Y%m%d.%H%M%S')
                     seq      = '{:04}'.format(self.file_seq)
-                    filename = qPath_stt + stamp + '.' + seq + '.ctrl_r_key.txt'
+                    filename = qPath_stt + stamp + '.' + seq + '.alt_r_key.txt'
 
                     # 音声入力
                     text = ''
@@ -338,11 +338,11 @@ class _key2STT:
                     # RiKi処理
                     if (text != ''):
                         text  = 'gemini,' + text + '\n'
-                        if(qHOSTNAME not in not_feedback_list):
-                            text += '結果は要約した内容で音声合成でお願いします。\n'
-                        if (self.last_ctrl_l_clip != ''):
+                        #if(qHOSTNAME not in not_feedback_list):
+                        #    text += '結果は要約した内容で音声合成でお願いします。\n'
+                        if (self.last_alt_l_clip != ''):
                             text += "''' 補足情報 \n"
-                            text += self.last_ctrl_r_clip + '\n'
+                            text += self.last_alt_r_clip + '\n'
                             text += "''' \n"
 
                         #text  = text
@@ -356,7 +356,7 @@ class _key2STT:
                     self.start_kb_listener()
 
         # --------------------
-        # shift(l) キー
+        # shift_l キー
         # --------------------
         elif (key == keyboard.Key.shift_l):
             press_time = time.time()
@@ -370,7 +370,7 @@ class _key2STT:
                 else:
                     self.last_shift_l_time  = 0
                     self.last_shift_l_count = 0
-                    #print("Press shift(l) x 3 !")
+                    #print("Press shift_l x 3 !")
 
                     # キー操作監視 停止
                     self.stop_kb_listener()
@@ -410,7 +410,7 @@ class _key2STT:
                     self.start_kb_listener()
 
         # --------------------
-        # shift(r) キー
+        # shift_r キー
         # --------------------
         elif (key == keyboard.Key.shift_r):
             press_time = time.time()
@@ -424,7 +424,7 @@ class _key2STT:
                 else:
                     self.last_shift_r_time  = 0
                     self.last_shift_r_count = 0
-                    #print("Press shift(r) x 3 !")
+                    #print("Press shift_r x 3 !")
 
                     # キー操作監視 停止
                     self.stop_kb_listener()
@@ -487,12 +487,12 @@ class _key2STT:
         else:
             self.last_prtScrn_time  = 0
             self.last_prtScrn_count = 0
-            self.last_ctrl_l_time   = 0
-            self.last_ctrl_l_count  = 0
-            self.last_ctrl_l_clip   = ''
-            self.last_ctrl_r_time   = 0
-            self.last_ctrl_r_count  = 0
-            self.last_ctrl_r_clip   = ''
+            self.last_alt_l_time    = 0
+            self.last_alt_l_count   = 0
+            self.last_alt_l_clip    = ''
+            self.last_alt_r_time    = 0
+            self.last_alt_r_count   = 0
+            self.last_alt_r_clip    = ''
             self.last_shift_l_time  = 0
             self.last_shift_l_count = 0
             self.last_shift_r_time  = 0
@@ -571,7 +571,7 @@ class _class:
         self.func_auth = "h0MmuBSfyHFVSPQ+uqVSZBIEFnpafvnyC5iUaJ1gfkR9LeNjKv1SKFDvY+K32/wI"
         self.function  = {
             "name": self.func_name,
-            "description": "拡張ＵＩ_キー(PrtScrn,ctrl,shift)連打で、音声入力する。",
+            "description": "拡張ＵＩ_キー(PrtScrn,alt,shift)連打で、音声入力する。",
             "parameters": {
                 "type": "object",
                 "properties": {

@@ -67,6 +67,7 @@ class ChatClass:
     チャットボットクラス
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
+                        main=None, conf=None, data=None, addin=None, botFunc=None,
                         core_port: str = '8000', self_port: str = '8001', ):
         """
         コンストラクタ
@@ -90,6 +91,11 @@ class ChatClass:
         qLog.log('info', self.proc_id, 'init')
 
         # 設定
+        self.main = main
+        self.conf = conf
+        self.data = data
+        self.addin = addin
+        self.botFunc = botFunc
         self.core_port = core_port
         self.self_port = self_port
         self.local_endpoint = f'http://localhost:{ self.core_port }'
@@ -117,15 +123,19 @@ class ChatClass:
         self.freeaiAPI = speech_bot_freeai._freeaiAPI()
         self.freeaiAPI.init(log_queue=None)
 
-        # freeai 認証実行
+        # freeai 認証情報
         api_type = freeai_key.getkey('freeai','freeai_api_type')
-        #print(api_type)
+        key_id   = freeai_key.getkey('freeai','freeai_key_id')
+        if (self.conf.freeai_key_id not in ['', '< your freeai key >']):
+            key_id = self.conf.freeai_key_id
+
+        # freeai 認証実行
         res = self.freeaiAPI.authenticate('freeai',
                             api_type,
                             freeai_key.getkey('freeai','freeai_default_gpt'), freeai_key.getkey('freeai','freeai_default_class'),
                             freeai_key.getkey('freeai','freeai_auto_continue'),
                             freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_assistant'),
-                            freeai_key.getkey('freeai','freeai_key_id'),
+                            key_id,
                             freeai_key.getkey('freeai','freeai_a_nick_name'), freeai_key.getkey('freeai','freeai_a_model'), freeai_key.getkey('freeai','freeai_a_token'),
                             freeai_key.getkey('freeai','freeai_b_nick_name'), freeai_key.getkey('freeai','freeai_b_model'), freeai_key.getkey('freeai','freeai_b_token'),
                             freeai_key.getkey('freeai','freeai_v_nick_name'), freeai_key.getkey('freeai','freeai_v_model'), freeai_key.getkey('freeai','freeai_v_token'),
@@ -150,15 +160,19 @@ class ChatClass:
         self.perplexityAPI = speech_bot_perplexity._perplexityAPI()
         self.perplexityAPI.init(log_queue=None)
 
-        # perplexity 認証実行
+        # perplexity 認証情報
         api_type = perplexity_key.getkey('perplexity','perplexity_api_type')
-        #print(api_type)
+        key_id   = perplexity_key.getkey('perplexity','perplexity_key_id')
+        if (self.conf.perplexity_key_id not in ['', '< your perplexity key >']):
+            key_id = self.conf.perplexity_key_id
+
+        # perplexity 認証実行
         res = self.perplexityAPI.authenticate('perplexity',
                             api_type,
                             perplexity_key.getkey('perplexity','perplexity_default_gpt'), perplexity_key.getkey('perplexity','perplexity_default_class'),
                             perplexity_key.getkey('perplexity','perplexity_auto_continue'),
                             perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_assistant'),
-                            perplexity_key.getkey('perplexity','perplexity_key_id'),
+                            key_id,
                             perplexity_key.getkey('perplexity','perplexity_a_nick_name'), perplexity_key.getkey('perplexity','perplexity_a_model'), perplexity_key.getkey('perplexity','perplexity_a_token'),
                             perplexity_key.getkey('perplexity','perplexity_b_nick_name'), perplexity_key.getkey('perplexity','perplexity_b_model'), perplexity_key.getkey('perplexity','perplexity_b_token'),
                             perplexity_key.getkey('perplexity','perplexity_v_nick_name'), perplexity_key.getkey('perplexity','perplexity_v_model'), perplexity_key.getkey('perplexity','perplexity_v_token'),
@@ -183,17 +197,35 @@ class ChatClass:
         self.openaiAPI = speech_bot_openai.ChatBotAPI()
         self.openaiAPI.init(log_queue=None)
 
-        # 認証実行
-        api_type = openai_key.getkey('chatgpt','openai_api_type')
-        #print(api_type)
+        # openai 認証情報
+        api_type      = openai_key.getkey('chatgpt','openai_api_type')
+        organization  = openai_key.getkey('chatgpt','openai_organization')
+        openai_key_id = openai_key.getkey('chatgpt','openai_key_id')
+        endpoint      = openai_key.getkey('chatgpt','azure_endpoint')
+        version       = openai_key.getkey('chatgpt','azure_version')
+        azure_key_id  = openai_key.getkey('chatgpt','azure_key_id'),
+        if (self.conf.openai_api_type != ''):
+            api_type = self.conf.openai_api_type
+        if (self.conf.openai_organization not in ['', '< your openai organization >']):
+            organization = self.conf.openai_organization
+        if (self.conf.openai_key_id not in ['', '< your openai key >']):
+            openai_key_id = self.conf.openai_key_id
+        if (self.conf.azure_endpoint not in ['', '< your azure endpoint base >']):
+            endpoint = self.conf.azure_endpoint
+        if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
+            version = self.conf.azure_version
+        if (self.conf.azure_key_id not in ['', '< your azure key >']):
+            azure_key_id = self.conf.azure_key_id
+
+        # openai 認証実行
         if (api_type != 'azure'):
             res = self.openaiAPI.authenticate('chatgpt',
                             api_type,
                             openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
                             openai_key.getkey('chatgpt','openai_auto_continue'),
                             openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
-                            openai_key.getkey('chatgpt','openai_organization'), openai_key.getkey('chatgpt','openai_key_id'),
-                            openai_key.getkey('chatgpt','azure_endpoint'), openai_key.getkey('chatgpt','azure_version'), openai_key.getkey('chatgpt','azure_key_id'),
+                            organization, openai_key_id,
+                            endpoint, version, azure_key_id,
                             openai_key.getkey('chatgpt','gpt_a_nick_name'),
                             openai_key.getkey('chatgpt','gpt_a_model1'), openai_key.getkey('chatgpt','gpt_a_token1'),
                             openai_key.getkey('chatgpt','gpt_a_model2'), openai_key.getkey('chatgpt','gpt_a_token2'),
@@ -215,8 +247,8 @@ class ChatClass:
                             openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
                             openai_key.getkey('chatgpt','openai_auto_continue'),
                             openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
-                            openai_key.getkey('chatgpt','openai_organization'), openai_key.getkey('chatgpt','openai_key_id'),
-                            openai_key.getkey('chatgpt','azure_endpoint'), openai_key.getkey('chatgpt','azure_version'), openai_key.getkey('chatgpt','azure_key_id'),
+                            organization, openai_key_id,
+                            endpoint, version, azure_key_id,
                             openai_key.getkey('chatgpt','azure_a_nick_name'),
                             openai_key.getkey('chatgpt','azure_a_model1'), openai_key.getkey('chatgpt','azure_a_token1'),
                             openai_key.getkey('chatgpt','azure_a_model2'), openai_key.getkey('chatgpt','azure_a_token2'),
@@ -251,15 +283,19 @@ class ChatClass:
         self.claudeAPI = speech_bot_claude._claudeAPI()
         self.claudeAPI.init(log_queue=None)
 
-        # claude 認証実行
+        # claude 認証情報
         api_type = claude_key.getkey('claude','claude_api_type')
-        #print(api_type)
+        key_id   = claude_key.getkey('claude','claude_key_id')
+        if (self.conf.claude_key_id not in ['', '< your claude key >']):
+            key_id = self.conf.claude_key_id
+
+        # claude 認証実行
         res = self.claudeAPI.authenticate('claude',
                             api_type,
                             claude_key.getkey('claude','claude_default_gpt'), claude_key.getkey('claude','claude_default_class'),
                             claude_key.getkey('claude','claude_auto_continue'),
                             claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_assistant'),
-                            claude_key.getkey('claude','claude_key_id'),
+                            key_id,
                             claude_key.getkey('claude','claude_a_nick_name'), claude_key.getkey('claude','claude_a_model'), claude_key.getkey('claude','claude_a_token'),
                             claude_key.getkey('claude','claude_b_nick_name'), claude_key.getkey('claude','claude_b_model'), claude_key.getkey('claude','claude_b_token'),
                             claude_key.getkey('claude','claude_v_nick_name'), claude_key.getkey('claude','claude_v_model'), claude_key.getkey('claude','claude_v_token'),
@@ -284,15 +320,19 @@ class ChatClass:
         self.geminiAPI = speech_bot_gemini._geminiAPI()
         self.geminiAPI.init(log_queue=None)
 
-        # gemini 認証実行
+        # gemini 認証情報
         api_type = gemini_key.getkey('gemini','gemini_api_type')
-        #print(api_type)
+        key_id   = gemini_key.getkey('gemini','gemini_key_id')
+        if (self.conf.gemini_key_id not in ['', '< your gemini key >']):
+            key_id = self.conf.gemini_key_id
+
+        # gemini 認証実行
         res = self.geminiAPI.authenticate('gemini',
                             api_type,
                             gemini_key.getkey('gemini','gemini_default_gpt'), gemini_key.getkey('gemini','gemini_default_class'),
                             gemini_key.getkey('gemini','gemini_auto_continue'),
                             gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_assistant'),
-                            gemini_key.getkey('gemini','gemini_key_id'),
+                            key_id,
                             gemini_key.getkey('gemini','gemini_a_nick_name'), gemini_key.getkey('gemini','gemini_a_model'), gemini_key.getkey('gemini','gemini_a_token'),
                             gemini_key.getkey('gemini','gemini_b_nick_name'), gemini_key.getkey('gemini','gemini_b_model'), gemini_key.getkey('gemini','gemini_b_token'),
                             gemini_key.getkey('gemini','gemini_v_nick_name'), gemini_key.getkey('gemini','gemini_v_model'), gemini_key.getkey('gemini','gemini_v_token'),
@@ -317,15 +357,22 @@ class ChatClass:
         self.ollamaAPI = speech_bot_ollama._ollamaAPI()
         self.ollamaAPI.init(log_queue=None)
 
-        # ollama 認証実行
+        # ollama 認証情報
         api_type = ollama_key.getkey('ollama','ollama_api_type')
-        #print(api_type)
+        server   = ollama_key.getkey('ollama','ollama_server')
+        port     = ollama_key.getkey('ollama','ollama_port')
+        if (self.conf.ollama_server not in['', 'auto']):
+            server = self.conf.ollama_server
+        if (self.conf.ollama_port not in['', 'auto']):
+            port = self.conf.ollama_port
+
+        # ollama 認証実行
         res = self.ollamaAPI.authenticate('ollama',
                             api_type,
                             ollama_key.getkey('ollama','ollama_default_gpt'), ollama_key.getkey('ollama','ollama_default_class'),
                             ollama_key.getkey('ollama','ollama_auto_continue'),
                             ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_assistant'),
-                            ollama_key.getkey('ollama','ollama_server'), ollama_key.getkey('ollama','ollama_port'),
+                            server, port,
                             ollama_key.getkey('ollama','ollama_a_nick_name'), ollama_key.getkey('ollama','ollama_a_model'), ollama_key.getkey('ollama','ollama_a_token'),
                             ollama_key.getkey('ollama','ollama_b_nick_name'), ollama_key.getkey('ollama','ollama_b_model'), ollama_key.getkey('ollama','ollama_b_token'),
                             ollama_key.getkey('ollama','ollama_v_nick_name'), ollama_key.getkey('ollama','ollama_v_model'), ollama_key.getkey('ollama','ollama_v_token'),
@@ -350,15 +397,19 @@ class ChatClass:
         self.plamoAPI = speech_bot_plamo._plamoAPI()
         self.plamoAPI.init(log_queue=None)
 
-        # plamo 認証実行
+        # plamo 認証情報
         api_type = plamo_key.getkey('plamo','plamo_api_type')
-        #print(api_type)
+        key_id   = plamo_key.getkey('plamo','plamo_key_id')
+        if (self.conf.plamo_key_id not in ['', '< your plamo key >']):
+            key_id = self.conf.plamo_key_id
+
+        # plamo 認証実行
         res = self.plamoAPI.authenticate('plamo',
                             api_type,
                             plamo_key.getkey('plamo','plamo_default_gpt'), plamo_key.getkey('plamo','plamo_default_class'),
                             plamo_key.getkey('plamo','plamo_auto_continue'),
                             plamo_key.getkey('plamo','plamo_max_step'), plamo_key.getkey('plamo','plamo_max_assistant'),
-                            plamo_key.getkey('plamo','plamo_key_id'),
+                            key_id,
                             plamo_key.getkey('plamo','plamo_a_nick_name'), plamo_key.getkey('plamo','plamo_a_model'), plamo_key.getkey('plamo','plamo_a_token'),
                             plamo_key.getkey('plamo','plamo_b_nick_name'), plamo_key.getkey('plamo','plamo_b_model'), plamo_key.getkey('plamo','plamo_b_token'),
                             plamo_key.getkey('plamo','plamo_v_nick_name'), plamo_key.getkey('plamo','plamo_v_model'), plamo_key.getkey('plamo','plamo_v_token'),

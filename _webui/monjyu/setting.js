@@ -458,6 +458,27 @@ function assistant_set_engine(engine) {
         post_mode_setting('session');
 }
 
+// Reactを差し替える関数
+function post_set_react(filename) {
+    var formData = {};
+    formData = {
+        filename: filename,
+    }
+    // 設定値をサーバーに送信
+    $.ajax({
+        url: '/post_set_react',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            console.log('post_set_react:', response);
+        },
+        error: function(xhr, status, error) {
+            console.error('post_set_react error:', error);
+        }
+    });
+}
+
 // ドキュメントが読み込まれた時に実行される処理
 $(document).ready(function() {
 
@@ -581,6 +602,13 @@ $(document).ready(function() {
         assistant_set_engine('plamo');
     });
     
+    $('#react-halloWorld').click(function() {
+        post_set_react('react-sample-halloWorld.zip');
+    });
+    $('#react-realtimeConsole').click(function() {
+        post_set_react('openai-realtime-console-main.zip');
+    });
+
     // タブ切り替え処理
     $('.frame-tab .tab-header button').click(function() {
         var target = $(this).data('target');

@@ -56,6 +56,7 @@ rem python -m pip  install --upgrade opencv-contrib-python
     python -m pip  install --upgrade python-multipart
 
     python -m pip  install --upgrade httpx
+    python -m pip  install --upgrade websockets
     python -m pip  install --upgrade tiktoken
     python -m pip  install --upgrade openai
     python -m pip  install --upgrade anthropic
@@ -111,7 +112,7 @@ IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
     del  "%pyname%.spec"
     copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
     copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
-    copy "%pyname%.exe"        "C:\_共有\ClipnGPT\%pyname%.exe"
+    copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
     ping  localhost -w 1000 -n 1 >nul
 rem del  "%pyname%.exe"
 
@@ -127,7 +128,7 @@ IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
     del  "%pyname%.spec"
 rem copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
 rem copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
-rem copy "%pyname%.exe"        "C:\_共有\ClipnGPT\%pyname%.exe"
+rem copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
     ping  localhost -w 1000 -n 1 >nul
 rem del  "%pyname%.exe"
 
@@ -143,6 +144,8 @@ IF EXIST "C:\RiKi_assistant\temp"              RD "C:\RiKi_assistant\temp"      
 IF EXIST "C:\RiKi_assistant\_cache"            RD "C:\RiKi_assistant\_cache"            /s /q
 IF EXIST "C:\_共有\Worker\temp"                RD "C:\_共有\Worker\temp"                /s /q
 IF EXIST "C:\_共有\Worker\_cache"              RD "C:\_共有\Worker\_cache"              /s /q
+IF EXIST "C:\_共有\Monjyu\temp"                RD "C:\_共有\Monjyu\temp"                /s /q
+IF EXIST "C:\_共有\Monjyu\_cache"              RD "C:\_共有\Monjyu\_cache"              /s /q
 PAUSE
 
 

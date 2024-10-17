@@ -133,6 +133,7 @@ class SubAiClass:
         self.webui_endpoint = self.core_endpoint.replace(f':{self.core_port}', f':{int(self.core_port) + 8}')
         self.profile_number = profile_number
         self.chat_class = RiKi_Monjyu__subbot.ChatClass(runMode=runMode, qLog_fn=qLog_fn, 
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
                                                         core_port=core_port, self_port=self_port)
         # スレッドロック
         self.thread_lock = threading.Lock()

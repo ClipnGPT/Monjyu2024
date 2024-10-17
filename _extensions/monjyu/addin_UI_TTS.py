@@ -119,17 +119,24 @@ class _tts_woker:
             self.last_mouse_time = time.time()
     # マウス位置
     def mouse_position(self):
-        mouse_controler = mouse.Controller()
-        return mouse_controler.position
+        try:
+            mouse_controler = mouse.Controller()
+            #print("check", mouse_controler.position)
+            return mouse_controler.position
+        except:
+            return (0, 0)
 
     # Worker デーモン
     def proc_worker(self):
         while True:
-            #(x, y) = pyautogui.position()
-            (x, y) = self.mouse_position()
-            self.last_mouse_x = x
-            self.last_mouse_y = y
-            self.tts_proc()
+            try:
+                #(x, y) = pyautogui.position()
+                (x, y) = self.mouse_position()
+                self.last_mouse_x = x
+                self.last_mouse_y = y
+                self.tts_proc()
+            except:
+                pass
             time.sleep(0.25)
 
         return True

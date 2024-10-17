@@ -54,7 +54,6 @@ class _conf_class:
 
         # APIキー関連設定
         self.openai_api_type = ''
-        self.openai_default_gpt = ''
         self.openai_organization = '< your openai organization >'
         self.openai_key_id = '< your openai key >'
         self.azure_endpoint = '< your azure endpoint base >'
@@ -104,7 +103,6 @@ class _conf_class:
             dic['cgpt_engine_webSearch'] = self.cgpt_engine_webSearch
             dic['cgpt_engine_assistant'] = self.cgpt_engine_assistant
             dic['openai_api_type'] = self.openai_api_type
-            dic['openai_default_gpt'] = self.openai_default_gpt
             dic['openai_organization'] = self.openai_organization
             dic['openai_key_id'] = self.openai_key_id
             dic['azure_endpoint'] = self.azure_endpoint
@@ -132,7 +130,6 @@ class _conf_class:
             self.cgpt_engine_webSearch = dic['cgpt_engine_webSearch']
             self.cgpt_engine_assistant = dic['cgpt_engine_assistant']
             self.openai_api_type = dic['openai_api_type']
-            self.openai_default_gpt = dic['openai_default_gpt']
             self.openai_organization = dic['openai_organization']
             self.openai_key_id = dic['openai_key_id']
             self.azure_endpoint = dic['azure_endpoint']

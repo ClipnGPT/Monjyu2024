@@ -138,7 +138,12 @@ if __name__ == '__main__':
     limit_date = '{:1d}{:1d}'.format(int(float(3.0)), int(float(1.0)))
     limit_date = '{:1d}{:1d}'.format(int(float(1.0)), int(float(2.0))) + '/' + limit_date
     limit_date = '/' + limit_date
-    limit_date = '{:3d}{:1d}'.format(int(float(202.0)), int(float(4.0))) + limit_date
+    limit_date = '{:3d}{:1d}'.format(int(float(202.0)), int(float(5.0))) + limit_date
+    #limit_date = '2024/10/31'
+    dt = datetime.datetime.now()
+    dateinfo_today = dt.strftime('%Y/%m/%d')
+    dt = datetime.datetime.strptime(limit_date, '%Y/%m/%d') + datetime.timedelta(days=-60)
+    dateinfo_start = dt.strftime('%Y/%m/%d')
     main_start = time.time()
 
     # ディレクトリ作成
@@ -169,6 +174,13 @@ if __name__ == '__main__':
 
     # 初期設定
     if True:
+         # ライセンス制限
+        if (dateinfo_today >= dateinfo_start):
+            qLog.log('warning', main_id, '利用ライセンスは、 ' + limit_date + ' まで有効です。')
+        if (dateinfo_today > limit_date):
+            time.sleep(60)
+            sys.exit(0)
+
         # ポート設定
         core_port = str(CORE_PORT)
         sub_base  = str(SUB_BASE)
@@ -235,6 +247,9 @@ if __name__ == '__main__':
     webui_thread = threading.Thread(target=webui_class.run)
     webui_thread.daemon = True
     webui_thread.start()
+
+    # 起動メッセージ
+    qLog.log('info', main_id, 'Welcome Monjyu! Please access "http://localhost:8008/" in your browser.')
 
     # 無限ループでプロセスを監視
     while True:

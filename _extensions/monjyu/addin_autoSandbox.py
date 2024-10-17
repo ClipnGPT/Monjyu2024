@@ -128,8 +128,11 @@ class sandbox_class:
             res_msg  = 'react実行でpackage.jsonが見つかりません。実行準備に失敗しました。'
             return res_okng, res_msg
 
+        #if (os.path.isdir(qPath_sandbox + qSandBox_name)):
+        #    shutil.rmtree(qPath_sandbox + qSandBox_name + '/*.*', ignore_errors=True, )
+
         # ファイルコピー
-        shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
+        #shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
 
         # react 準備
         bat_start = qPath_sandbox + extract_dir[:-1] + '_start'
@@ -139,10 +142,16 @@ class sandbox_class:
             bat_build = bat_build.replace('/', '\\') + '.bat'
 
         txts = []
+        if (os.name == 'nt'):
+            txts.append('taskkill /f /im node.exe')
         txts.append('cd "' + self.abs_path + '"')
-        txts.append('xcopy /e/h/c/i/y ' + extract_dir[:-1] + ' ' + qSandBox_name)
-        txts.append('cd "' + qSandBox_name + '"')
+        #txts.append('xcopy /e/h/c/i/y ' + extract_dir[:-1] + ' ' + qSandBox_name)
+        #txts.append('cd "' + qSandBox_name + '"')
+        txts.append('cd "' + extract_dir[:-1] + '"')
         txts.append('echo BROWSER=none > .env')
+        #txts.append('start npm run stop')
+        #txts.append('ping localhost -w 1000 -n 15 >nul')
+        txts.append('call npm i')
         txts.append('call npm run start --silent < ../_yes.txt')
         txts.append('exit')
         if (os.name == 'nt'):
@@ -151,11 +160,17 @@ class sandbox_class:
             self.txtsWrite(filename=bat_start, txts=txts, )
                 
         txts = []
+        if (os.name == 'nt'):
+            txts.append('taskkill /f /im node.exe')
         txts.append('cd "' + self.abs_path + '"')
-        txts.append('xcopy /e/h/c/i/y ' + extract_dir[:-1] + ' ' + qSandBox_name)
-        txts.append('cd "' + qSandBox_name + '"')
-        txts.append('echo BROWSER=none > .env')
-        txts.append('call npm run build --silent < ../_yes.txt')
+        #txts.append('xcopy /e/h/c/i/y ' + extract_dir[:-1] + ' ' + qSandBox_name)
+        #txts.append('cd "' + qSandBox_name + '"')
+        txts.append('cd "' + extract_dir[:-1] + '"')
+        txts.append('echo  BROWSER=none > .env')
+        #txts.append('start npm run stop')
+        #txts.append('ping localhost -w 1000 -n 15 >nul')
+        txts.append('call npm i')
+        txts.append('call npm run start --silent < ../_yes.txt')
         txts.append('exit')
         if (os.name == 'nt'):
             self.txtsWrite(filename=bat_build, txts=txts, encoding='shift_jis', )
@@ -519,8 +534,15 @@ if __name__ == '__main__':
     ext = _class()
     print(ext.func_proc('{ "runMode" : "assistant" }'))
 
+    time.sleep(120.00)
+
     print(ext.func_proc('{ ' \
-                      + '"file_path" : "halloWorld.zip"' \
+                      + '"file_path" : "react-sample-halloWorld.zip"' \
                       + ' }'))
 
+    #print(ext.func_proc('{ ' \
+    #                  + '"file_path" : "openai-realtime-console-main.zip"' \
+    #                  + ' }'))
+
+    time.sleep(180.00)
 

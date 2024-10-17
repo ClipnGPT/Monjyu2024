@@ -25,7 +25,8 @@ import numpy as np
 import cv2
 
 config_path  = '_config/'
-config_file  = 'RiKi_ClipnGPT_key.json'
+config_file1 = 'RiKi_Monjyu_key.json'
+config_file2 = 'RiKi_ClipnGPT_key.json'
 qPath_output = 'temp/output/'
 
 model_generate = 'dall-e-3'
@@ -74,49 +75,33 @@ class _class:
         self.last_image = None
 
         # APIキーを取得
-        if (os.path.isfile(config_path + config_file)):
-            with codecs.open(config_path + config_file, 'r', 'utf-8') as f:
+        if   (os.path.isfile(config_path + config_file1)):
+            with codecs.open(config_path + config_file1, 'r', 'utf-8') as f:
                 self.config_dic = json.load(f)
-        elif (os.path.isfile('../../' + config_path + config_file)):
-            with codecs.open('../../' + config_path + config_file, 'r', 'utf-8') as f:
+        elif (os.path.isfile(config_path + config_file2)):
+            with codecs.open(config_path + config_file2, 'r', 'utf-8') as f:
                 self.config_dic = json.load(f)
-        self.openai_api_type     = self.config_dic['openai_api_type']
-        if (self.openai_api_type != 'azure'):
-            self.openai_organization = self.config_dic['openai_organization']
-            self.openai_key_id       = self.config_dic['openai_key_id']
-            if (self.openai_organization == '') \
-            or (self.openai_organization == '< your openai organization >') \
-            or (self.openai_key_id == '') \
-            or (self.openai_key_id == '< your openai key >'):
-                raise ValueError("Please set your openai organization and key !")
-        else:
-            self.azure_endpoint     = self.config_dic['azure_endpoint']
-            self.azure_version      = self.config_dic['azure_version']
-            self.azure_key_id       = self.config_dic['azure_key_id']
-            if (self.azure_endpoint == '') \
-            or (self.azure_endpoint == '< your azure endpoint base >') \
-            or (self.azure_version  == '') \
-            or (self.azure_version  == 'yyyy-mm-dd') \
-            or (self.azure_key_id   == '') \
-            or (self.azure_key_id   == '< your azure key >'):
-                raise ValueError("Please set your azure endpoint, version and key !")
+        elif (os.path.isfile('../../' + config_path + config_file1)):
+            with codecs.open('../../' + config_path + config_file1, 'r', 'utf-8') as f:
+                self.config_dic = json.load(f)
+        elif (os.path.isfile('../../' + config_path + config_file2)):
+            with codecs.open('../../' + config_path + config_file2, 'r', 'utf-8') as f:
+                self.config_dic = json.load(f)
+        self.openai_organization = self.config_dic['openai_organization']
+        self.openai_key_id       = self.config_dic['openai_key_id']
+        if (self.openai_organization == '') \
+        or (self.openai_organization == '< your openai organization >') \
+        or (self.openai_key_id == '') \
+        or (self.openai_key_id == '< your openai key >'):
+            raise ValueError("Please set your openai organization and key !")
 
         # APIキーを設定
-        if (self.openai_api_type != 'azure'):
-            openai.organization = self.openai_organization
-            openai.api_key      = self.openai_key_id
-            self.client = openai.OpenAI(
-                organization=self.openai_organization,
-                api_key=self.openai_key_id,
-            )
-
-        else:
-            #raise ValueError("Image generation functions are not currently supported by azure !")
-            self.client = openai.AzureOpenAI(
-                azure_endpoint=self.azure_endpoint,
-                api_version=self.azure_version,
-                api_key=self.azure_key_id,
-            )
+        openai.organization = self.openai_organization
+        openai.api_key      = self.openai_key_id
+        self.client = openai.OpenAI(
+            organization=self.openai_organization,
+            api_key=self.openai_key_id,
+        )
 
         # 出力フォルダ用意
         if (not os.path.isdir(qPath_output)):

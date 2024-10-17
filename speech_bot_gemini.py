@@ -584,7 +584,7 @@ class _geminiAPI:
             generation_config_normal = {
                 "temperature": temperature,
                 "top_p": 0.95,
-                "top_k": 64,
+                "top_k": 32,
                 "max_output_tokens": 8192,
                 "response_mime_type": "text/plain",
             }
@@ -599,7 +599,7 @@ class _geminiAPI:
             generation_config_json = {
                 "temperature": temperature,
                 "top_p": 0.95,
-                "top_k": 64,
+                "top_k": 32,
                 "max_output_tokens": 8192,
                 "response_mime_type": "application/json",
             }
@@ -941,7 +941,8 @@ if __name__ == '__main__':
                 sysText = None
                 reqText = ''
                 #inpText = 'flash,おはようございます。'
-                inpText = 'gemini,兵庫県三木市の天気？'
+                #inpText = 'gemini,兵庫県三木市の天気？'
+                inpText = 'gemini,今日は何日？'
                 print()
                 print('[Request]')
                 print(reqText, inpText )
@@ -976,7 +977,7 @@ if __name__ == '__main__':
                 print(str(res_text))
                 print()
 
-            if True:
+            if False:
                 sysText = None
                 reqText = ''
                 inpText = 'この画像はなんだと思いますか？'

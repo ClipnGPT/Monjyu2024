@@ -176,6 +176,7 @@ class CoreAiClass:
 
         # 自己bot設定
         self.chat_class = RiKi_Monjyu__subbot.ChatClass(runMode=runMode, qLog_fn=qLog_fn, 
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
                                                         core_port=core_port, self_port=self_port)
         self.history    = []
 

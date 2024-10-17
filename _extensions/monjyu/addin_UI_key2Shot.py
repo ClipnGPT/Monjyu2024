@@ -148,7 +148,7 @@ class _key2Shot:
                     self.start_kb_listener()
 
         # --------------------
-        # shift(r) キー
+        # shift_r キー
         # --------------------
         if (key == keyboard.Key.shift_r):
             press_time = time.time()
@@ -162,7 +162,7 @@ class _key2Shot:
                 else:
                     self.last_shift_r_time  = 0
                     self.last_shift_r_count = 0
-                    #print("Press shift(r) x 3 !")
+                    #print("Press shift_r x 3 !")
 
                     # キー操作監視 停止
                     self.stop_kb_listener()

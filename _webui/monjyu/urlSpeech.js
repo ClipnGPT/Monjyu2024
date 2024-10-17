@@ -315,6 +315,12 @@ $(document).ready(function() {
     });
 
     // 小説家になろう ボタンのクリックイベント
+    $('#url-seijyo-1').click(function() {
+        $('#url_path').val('https://ncode.syosetu.com/n8976gy/1/');
+        $('#req_text').val( $('#req_doc').val() );
+        $('#res_json').val( $('#schema_doc').val() );
+        url_to_text();
+    });
     $('#url-honzuki-1').click(function() {
         $('#url_path').val('https://ncode.syosetu.com/n4830bu/1/');
         $('#req_text').val( $('#req_doc').val() );

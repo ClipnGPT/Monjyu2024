@@ -46,6 +46,7 @@ qPath_log    = 'temp/_log/'
 qPath_input  = 'temp/input/'
 qPath_output = 'temp/output/'
 qPath_tts    = 'temp/s6_5tts_txt/'
+qPath_reacts = '_cv2data/reacts/'
 qPath_templates = '_webui/monjyu'
 qPath_static    = '_webui/monjyu/static'
 DEFAULT_ICON    = qPath_static + '/' + "icon_monjyu.png"
@@ -109,6 +110,10 @@ class speechJsonModel(BaseModel):
     speaker_female2: str
     speaker_etc: str
     tts_yesno: str
+
+# set react json 文字列モデル
+class setReactModel(BaseModel):
+    filename: str
 
 class WebUiProcess:
     """
@@ -197,6 +202,7 @@ class WebUiClass:
         self.app.get("/get_stt")(self.get_stt)
         self.app.get("/get_url_to_text")(self.get_url_to_text)
         self.app.post("/post_speech_json")(self.post_speech_json)
+        self.app.post("/post_set_react")(self.post_set_react)
 
         # テンプレートとスタティックファイルのマウント
         self.app.mount("/", StaticFiles(directory=qPath_templates), name="root")
@@ -642,6 +648,37 @@ class WebUiClass:
         except Exception as e:
             print('post_speech_json', e)
         raise HTTPException(status_code=503, detail='post_speech_json error')
+
+    async def post_set_react(self, data: setReactModel):
+        filename = data.filename
+        print(filename)
+        from_file = qPath_reacts + filename
+        to_file   = qPath_output + filename
+        if (not os.path.isfile(from_file)):
+            raise HTTPException(status_code=404, detail='post_set_react error')
+
+        try:
+            shutil.copy(from_file, to_file)
+            if (not os.path.isfile(to_file)):
+                raise HTTPException(status_code=404, detail='post_set_react error')
+
+            # SandBox
+            ext_module = self.addin.addin_modules.get('addin_autoSandbox', None)
+            if (ext_module is not None):
+
+                dic = {}
+                dic['runMode']   = self.runMode
+                dic['file_path'] = filename
+                dic['browser']   = 'no'
+                json_dump = json.dumps(dic, ensure_ascii=False, )
+                ext_func_proc  = ext_module['func_proc']
+                res_json = ext_func_proc( json_dump )
+                #args_dic = json.loads(res_json)
+                return JSONResponse(content={'message': 'post_set_react successfully'})
+
+        except Exception as e:
+            print('post_speech_json', e)
+        raise HTTPException(status_code=503, detail='post_set_react error')
 
     def run(self):
         # サーバー設定と起動
