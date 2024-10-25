@@ -35,19 +35,12 @@ NOT_SEARCH = ['google.com',
               'gbiz.go.jp',
               ]
 
-import importlib
-
 url2text = None
 try:
     import     認証済_URLからテキスト取得
     url2text = 認証済_URLからテキスト取得._class()
 except:
-    try:
-        loader = importlib.machinery.SourceFileLoader('認証済_URLからテキスト取得.py', '_extensions/function/認証済_URLからテキスト取得.py')
-        認証済_URLからテキスト取得 = loader.load_module()
-        url2text  = 認証済_URLからテキスト取得._class()
-    except:
-        print('★認証済_URLからテキスト取得は利用できません！')
+    print('★認証済_URLからテキスト取得は利用できません！')
 
 class _class:
 

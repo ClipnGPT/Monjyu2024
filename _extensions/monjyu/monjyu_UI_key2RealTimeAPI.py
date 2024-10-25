@@ -27,6 +27,9 @@ import threading
 from pynput import keyboard
 #from pynput.keyboard import Controller
 
+import requests
+
+
 
 # インターフェース
 config_path  = '_config/'
@@ -43,6 +46,11 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 OUTPUT_CHUNK = 2400
 OUTPUT_RATE = 24000
+
+# 定数の定義
+CORE_PORT = '8000'
+CONNECTION_TIMEOUT = 15
+REQUEST_TIMEOUT = 30
 
 
 
@@ -174,15 +182,26 @@ class _key2Action:
 
 class _realtime_api_class:
     def __init__(self, api_key, model, ):
+
+        # 認証情報
         self.WS_URL = f"wss://api.openai.com/v1/realtime?model={ model }"
         self.HEADERS = {
             "Authorization": "Bearer " + api_key,
             "OpenAI-Beta": "realtime=v1"
         }
+
+        # botFunc
+        self.botFunc = None
+
+        # realtime
         self.audio_send_queue = queue.Queue()
         self.audio_receive_queue = queue.Queue()
         self.break_flag = False
         self.ws = None
+
+        # ポート設定等
+        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
+        self.user_id = 'admin'
 
     def base64_to_pcm16(self, audio_base64):
         audio_data = base64.b64decode(audio_base64)
@@ -191,6 +210,37 @@ class _realtime_api_class:
     def pcm16_to_base64(self, audio_data):
         audio_base64 = base64.b64encode(audio_data).decode("utf-8")
         return audio_base64
+
+    def send_request(self, request_text='',):
+        if (request_text is not None) and (request_text != ''):
+            print(f" User(text): { request_text }")
+
+            try:
+                # text 送信
+                request = {
+                    "type": "conversation.item.create",
+                    "item": {
+                        "type": "message",
+                        "role": "user",
+                        "content": [ {
+                            "type": "input_text",
+                            "text": request_text, 
+                        } ]
+                    },
+                }
+                self.ws.send(json.dumps(request))
+
+                # 送信通知
+                request = {
+                    "type": "response.create",
+                }
+                self.ws.send(json.dumps(request))
+
+            except Exception as e:
+                print(f"send_request: {e}")
+                return False
+
+        return True
 
     def input_audio_to_queue(self, input_stream, CHUNK):
         try:
@@ -221,34 +271,117 @@ class _realtime_api_class:
         self.break_flag = True
         return True
 
-    def receive_audio_to_queue(self):
+    def receive_proc(self):
         try:
-            print("assistant: ", end="", flush=True)
             while (not self.ws is None) and (not self.break_flag):
                 response = self.ws.recv()
                 if response:
                     response_data = json.loads(response)
-                    type = response_data.get('type')
+                    type  = response_data.get('type')
+                    delta = response_data.get('delta')
+                    transcript = response_data.get('transcript')
                     if type is not None:
-                        print(type)
-                        if type == "response.audio_transcript.delta":
-                            print(response_data["delta"], end="", flush=True)
-                        elif type == "response.audio_transcript.done":
-                            print("\nassistant: ", end="", flush=True)
-                        elif type == "conversation.item.input_audio_transcription.completed":
-                            print("\n↪︎by user messages: ", response_data["transcript"])
-                        elif type == "rate_limits.updated":
-                            print(f"Rate limits: {response_data['rate_limits'][0]['remaining']} requests remaining.")
-                        elif type == "input_audio_buffer.speech_started":
-                            while not self.audio_receive_queue.empty():
-                                self.audio_receive_queue.get() 
-                        elif type == "response.audio.delta":
+                        if   type == "response.audio.delta":
                             audio_base64_response = response_data["delta"]
                             if audio_base64_response:
                                 pcm16_audio = self.base64_to_pcm16(audio_base64_response)
                                 self.audio_receive_queue.put(pcm16_audio)
+                        elif type == "input_audio_buffer.speech_started":
+                            while not self.audio_receive_queue.empty():
+                                self.audio_receive_queue.get() 
+                        elif type == "response.audio_transcript.delta":
+                            pass # stream!
+                        elif type == "response.audio_transcript.done":
+                            print(f" Realtime : { transcript }")
+                            self.post_output_log(outText=transcript, outData=transcript)
+
+                        elif type == "conversation.item.input_audio_transcription.completed":
+                            print(f" Audio in : { transcript }")
+                            self.post_input_log(reqText=transcript, inpText='')
+
+                        elif type == "response.function_call_arguments.delta":
+                            pass # stream!
+
+                        elif type == "response.function_call_arguments.done":
+                            #print(response_data)
+                            #function_call: {'type': 'response.function_call_arguments.done', 'event_id': 'event_ALmEfkiWKqDURkButy6ao', 'response_id': 'resp_ALmEfMfNpweiZtvT8xuWY', 'item_id': 'item_ALmEfBwmW2hVho7a5ayy7', 'output_index': 0, 'call_id': 'call_kKkSCI8UdT26zFZS', 'name': 'get_location_weather', 'arguments': '{"location":"東京"}'}
+
+                            f_id = response_data.get('call_id')
+                            f_name = response_data.get('name')
+                            f_kwargs = response_data.get('arguments')
+                            hit = False
+
+                            #print()
+                            if self.botFunc is not None:
+                                for module_dic in self.botFunc.function_modules:
+                                    if (f_name == module_dic['func_name']):
+                                        hit = True
+                                        print(f" Realtime :   function_call '{ module_dic['script'] }' ({ f_name })")
+                                        print(f" Realtime :   → { f_kwargs }")
+
+                                        # function 実行
+                                        try:
+                                            ext_func_proc  = module_dic['func_proc']
+                                            res_json = ext_func_proc( f_kwargs )
+                                        except Exception as e:
+                                            print(e)
+                                            # エラーメッセージ
+                                            dic = {}
+                                            dic['error'] = e 
+                                            res_json = json.dumps(dic, ensure_ascii=False, )
+
+                                        # tool_result
+                                        print(f" Realtime :   → { res_json }")
+                                        #print()
+
+                                        try:
+                                            # result 送信
+                                            request = {
+                                                "type": "conversation.item.create",
+                                                "item": {
+                                                    "type": "function_call_output",
+                                                    "call_id": f_id,
+                                                    "output": res_json,
+                                                },
+                                            }
+                                            self.ws.send(json.dumps(request))
+
+                                            # 送信通知
+                                            request = {
+                                                "type": "response.create",
+                                            }
+                                            self.ws.send(json.dumps(request))
+
+                                        except Exception as e:
+                                            print(f"function_call: {e}")
+
+                        elif type in [
+                            "session.created",
+                            "session.updated",
+                            "response.created",
+                            "conversation.item.created",
+                            "rate_limits.updated",
+                            "response.output_item.added",
+                            "conversation.item.created",
+                            "response.content_part.added",
+                            "response.audio.done",
+                            "response.content_part.done",
+                            "response.output_item.done",
+                            "response.done",
+                            "input_audio_buffer.speech_stopped",
+                            "input_audio_buffer.committed",
+                        ]:
+                            pass
+
+                        else:
+                            print(response_data)
+                    else:
+                        print(response_data)
+                else:
+                    print(response)
+
         except Exception as e:
-            print(f"receive_audio_to_queue: {e}")
+            print(f"receive_proc: {e}")
         self.break_flag = True
         return True
 
@@ -281,6 +414,13 @@ class _realtime_api_class:
                 self.ws = websocket.create_connection(self.WS_URL, header=self.HEADERS)
                 print("WebSocketに接続しました。")
 
+                tools = []
+                if self.botFunc is not None:
+                    for module_dic in self.botFunc.function_modules:
+                        #print(module_dic['func_name'])
+                        tool = {'type': 'function'} | module_dic['function']
+                        tools.append( tool )
+
                 update_request = {
                     "type": "session.update",
                     "session": {
@@ -293,7 +433,9 @@ class _realtime_api_class:
                         },
                         "input_audio_transcription": {
                             "model": "whisper-1"
-                        }
+                        },
+                        "tools": tools,
+                        "tool_choice": "auto",
                     }
                 }
                 self.ws.send(json.dumps(update_request))
@@ -305,8 +447,9 @@ class _realtime_api_class:
                 threads = [
                     threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
                     threading.Thread(target=self.send_audio_from_queue, daemon=True),
-                    threading.Thread(target=self.receive_audio_to_queue, daemon=True),
-                    threading.Thread(target=self.output_audio_from_queue, args=(output_stream,), daemon=True)
+                    threading.Thread(target=self.receive_proc, daemon=True),
+                    threading.Thread(target=self.output_audio_from_queue, args=(output_stream,), daemon=True),
+                    threading.Thread(target=self.tools_debug, daemon=True)
                 ]
 
                 for thread in threads:
@@ -314,7 +457,7 @@ class _realtime_api_class:
 
             # 待機
             while (not self.break_flag):
-                time.sleep(1)
+                time.sleep(1.00)
 
         except Exception as e:
             print(f"_main: {e}")
@@ -335,7 +478,44 @@ class _realtime_api_class:
         if self.ws and self.ws.connected:
             self.ws.close()
             self.ws = None
-            print("WebSocketに切断しました。")
+            print("WebSocketを切断しました。")
+        return True
+
+    def post_input_log(self, reqText='', inpText=''):
+        # AI要求送信
+        try:
+            response = requests.post(
+                self.local_endpoint + '/post_input_log',
+                json={'user_id': self.user_id, 
+                      'request_text': reqText,
+                      'input_text': inpText, },
+                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
+            )
+            if response.status_code != 200:
+                print('error', f"Error response ({ CORE_PORT }/post_input_log) : {response.status_code} - {response.text}")
+        except Exception as e:
+            print('error', f"Error communicating ({ CORE_PORT }/post_input_log) : {e}")
+        return True
+
+    def post_output_log(self, outText='', outData=''):
+        # AI要求送信
+        try:
+            response = requests.post(
+                self.local_endpoint + '/post_output_log',
+                json={'user_id': self.user_id, 
+                      'output_text': outText,
+                      'output_data': outData, },
+                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
+            )
+            if response.status_code != 200:
+                print('error', f"Error response ({ CORE_PORT }/post_output_log) : {response.status_code} - {response.text}")
+        except Exception as e:
+            print('error', f"Error communicating ({ CORE_PORT }/post_output_log) : {e}")
+        return True
+
+    def tools_debug(self):
+        time.sleep(5.00)
+        self.send_request(request_text='日本の３大都市の天気？', )
         return True
 
 
@@ -357,19 +537,27 @@ class _class:
                         "type": "string",
                         "description": "実行モード 例) assistant"
                     },
+                    "reqText": {
+                        "type": "string",
+                        "description": "要求文字列 例) おはようございます"
+                    },
                 },
                 "required": ["runMode"]
             }
         }
 
-        # 初期設定
+        # 設定
         self.runMode = 'assistant'
-        self.func_reset()
 
         # キーボード監視 開始
         self.sub_proc = _key2Action(runMode=self.runMode, )
 
-    def func_reset(self, ):
+        # 初期化
+        self.func_reset()
+
+    def func_reset(self, botFunc=None, ):
+        if botFunc is not None:
+            self.sub_proc.realTimeAPI.botFunc = botFunc
         return True
 
     def func_proc(self, json_kwargs=None, ):
@@ -377,16 +565,23 @@ class _class:
 
         # 引数
         runMode = None
+        reqText = None
         if (json_kwargs is not None):
             args_dic = json.loads(json_kwargs)
             runMode = args_dic.get('runMode')
+            reqText = args_dic.get('reqText')
 
         if (runMode is None) or (runMode == ''):
-            runMode      = self.runMode
+            runMode = self.runMode
         else:
             self.runMode = runMode
 
         # 処理
+        if (reqText != ''):
+            if self.sub_proc.realTimeAPI.ws is None:
+                self.sub_proc.realTimeAPI.start()
+                time.sleep(5.00)
+            self.sub_proc.realTimeAPI.send_request(request_text=reqText, )
 
         # 戻り
         dic = {}
@@ -398,9 +593,12 @@ class _class:
 if __name__ == '__main__':
 
     ext = _class()
-    print(ext.func_proc('{ "runMode" : "assistant" }'))
+    print(ext.func_proc('{ "runMode" : "assistant", "reqText" : "" }'))
+
+    time.sleep(2)
+
+    print(ext.func_proc('{ "runMode" : "assistant", "reqText" : "おはようございます" }'))
 
     time.sleep(60)
-
 
 

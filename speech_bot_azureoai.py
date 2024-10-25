@@ -37,7 +37,7 @@ from openai.types.beta.threads.runs import ToolCall, ToolCallDelta, RunStep
 
 import tiktoken
 
-import speech_bot_openai_key  as openai_key
+import speech_bot_azureoai_key  as azureoai_key
 
 
 
@@ -360,7 +360,7 @@ class my_eventHandler(AssistantEventHandler):
 
 
 
-class ChatBotAPI:
+class AzureOaiAPI:
 
     def __init__(self, ):
         self.log_queue              = None
@@ -2731,60 +2731,60 @@ Respond according to the following criteria:
 
 if __name__ == '__main__':
 
-        #openaiAPI = speech_bot_openai.ChatBotAPI()
-        openaiAPI = ChatBotAPI()
+        #azureAPI = speech_bot_azureoai.AzureOaiAPI()
+        azureAPI = AzureOaiAPI()
 
-        api_type = openai_key.getkey('chatgpt','openai_api_type')
+        api_type = azureoai_key.getkey('chatgpt','openai_api_type')
         print(api_type)
 
         log_queue = queue.Queue()
-        res = openaiAPI.init(log_queue=log_queue, )
+        res = azureAPI.init(log_queue=log_queue, )
 
         if (api_type != 'azure'):
-            res = openaiAPI.authenticate('chatgpt',
+            res = azureAPI.authenticate('chatgpt',
                             api_type,
-                            openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
-                            openai_key.getkey('chatgpt','openai_auto_continue'),
-                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
-                            openai_key.getkey('chatgpt','openai_organization'), openai_key.getkey('chatgpt','openai_key_id'),
-                            openai_key.getkey('chatgpt','azure_endpoint'), openai_key.getkey('chatgpt','azure_version'), openai_key.getkey('chatgpt','azure_key_id'),
-                            openai_key.getkey('chatgpt','gpt_a_nick_name'),
-                            openai_key.getkey('chatgpt','gpt_a_model1'), openai_key.getkey('chatgpt','gpt_a_token1'),
-                            openai_key.getkey('chatgpt','gpt_a_model2'), openai_key.getkey('chatgpt','gpt_a_token2'),
-                            openai_key.getkey('chatgpt','gpt_a_model3'), openai_key.getkey('chatgpt','gpt_a_token3'),
-                            openai_key.getkey('chatgpt','gpt_b_nick_name'),
-                            openai_key.getkey('chatgpt','gpt_b_model1'), openai_key.getkey('chatgpt','gpt_b_token1'),
-                            openai_key.getkey('chatgpt','gpt_b_model2'), openai_key.getkey('chatgpt','gpt_b_token2'),
-                            openai_key.getkey('chatgpt','gpt_b_model3'), openai_key.getkey('chatgpt','gpt_b_token3'),
-                            openai_key.getkey('chatgpt','gpt_b_length'),
-                            openai_key.getkey('chatgpt','gpt_v_nick_name'),
-                            openai_key.getkey('chatgpt','gpt_v_model'), openai_key.getkey('chatgpt','gpt_v_token'),
-                            openai_key.getkey('chatgpt','gpt_x_nick_name'),
-                            openai_key.getkey('chatgpt','gpt_x_model1'), openai_key.getkey('chatgpt','gpt_x_token1'),
-                            openai_key.getkey('chatgpt','gpt_x_model2'), openai_key.getkey('chatgpt','gpt_x_token2'),
+                            azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
+                            azureoai_key.getkey('chatgpt','openai_auto_continue'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_organization'), azureoai_key.getkey('chatgpt','openai_key_id'),
+                            azureoai_key.getkey('chatgpt','azure_endpoint'), azureoai_key.getkey('chatgpt','azure_version'), azureoai_key.getkey('chatgpt','azure_key_id'),
+                            azureoai_key.getkey('chatgpt','gpt_a_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model1'), azureoai_key.getkey('chatgpt','gpt_a_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model2'), azureoai_key.getkey('chatgpt','gpt_a_token2'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model3'), azureoai_key.getkey('chatgpt','gpt_a_token3'),
+                            azureoai_key.getkey('chatgpt','gpt_b_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model1'), azureoai_key.getkey('chatgpt','gpt_b_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model2'), azureoai_key.getkey('chatgpt','gpt_b_token2'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model3'), azureoai_key.getkey('chatgpt','gpt_b_token3'),
+                            azureoai_key.getkey('chatgpt','gpt_b_length'),
+                            azureoai_key.getkey('chatgpt','gpt_v_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_v_model'), azureoai_key.getkey('chatgpt','gpt_v_token'),
+                            azureoai_key.getkey('chatgpt','gpt_x_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_x_model1'), azureoai_key.getkey('chatgpt','gpt_x_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_x_model2'), azureoai_key.getkey('chatgpt','gpt_x_token2'),
                             )
         else:
-            res = openaiAPI.authenticate('chatgpt',
+            res = azureAPI.authenticate('chatgpt',
                             api_type,
-                            openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
-                            openai_key.getkey('chatgpt','openai_auto_continue'),
-                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
-                            openai_key.getkey('chatgpt','openai_organization'), openai_key.getkey('chatgpt','openai_key_id'),
-                            openai_key.getkey('chatgpt','azure_endpoint'), openai_key.getkey('chatgpt','azure_version'), openai_key.getkey('chatgpt','azure_key_id'),
-                            openai_key.getkey('chatgpt','azure_a_nick_name'),
-                            openai_key.getkey('chatgpt','azure_a_model1'), openai_key.getkey('chatgpt','azure_a_token1'),
-                            openai_key.getkey('chatgpt','azure_a_model2'), openai_key.getkey('chatgpt','azure_a_token2'),
-                            openai_key.getkey('chatgpt','azure_a_model3'), openai_key.getkey('chatgpt','azure_a_token3'),
-                            openai_key.getkey('chatgpt','azure_b_nick_name'),
-                            openai_key.getkey('chatgpt','azure_b_model1'), openai_key.getkey('chatgpt','azure_b_token1'),
-                            openai_key.getkey('chatgpt','azure_b_model2'), openai_key.getkey('chatgpt','azure_b_token2'),
-                            openai_key.getkey('chatgpt','azure_b_model3'), openai_key.getkey('chatgpt','azure_b_token3'),
-                            openai_key.getkey('chatgpt','azure_b_length'),
-                            openai_key.getkey('chatgpt','azure_v_nick_name'),
-                            openai_key.getkey('chatgpt','azure_v_model'), openai_key.getkey('chatgpt','azure_v_token'),
-                            openai_key.getkey('chatgpt','azure_x_nick_name'),
-                            openai_key.getkey('chatgpt','azure_x_model1'), openai_key.getkey('chatgpt','azure_x_token1'),
-                            openai_key.getkey('chatgpt','azure_x_model2'), openai_key.getkey('chatgpt','azure_x_token2'),
+                            azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
+                            azureoai_key.getkey('chatgpt','openai_auto_continue'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_organization'), azureoai_key.getkey('chatgpt','openai_key_id'),
+                            azureoai_key.getkey('chatgpt','azure_endpoint'), azureoai_key.getkey('chatgpt','azure_version'), azureoai_key.getkey('chatgpt','azure_key_id'),
+                            azureoai_key.getkey('chatgpt','azure_a_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_a_model1'), azureoai_key.getkey('chatgpt','azure_a_token1'),
+                            azureoai_key.getkey('chatgpt','azure_a_model2'), azureoai_key.getkey('chatgpt','azure_a_token2'),
+                            azureoai_key.getkey('chatgpt','azure_a_model3'), azureoai_key.getkey('chatgpt','azure_a_token3'),
+                            azureoai_key.getkey('chatgpt','azure_b_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_b_model1'), azureoai_key.getkey('chatgpt','azure_b_token1'),
+                            azureoai_key.getkey('chatgpt','azure_b_model2'), azureoai_key.getkey('chatgpt','azure_b_token2'),
+                            azureoai_key.getkey('chatgpt','azure_b_model3'), azureoai_key.getkey('chatgpt','azure_b_token3'),
+                            azureoai_key.getkey('chatgpt','azure_b_length'),
+                            azureoai_key.getkey('chatgpt','azure_v_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_v_model'), azureoai_key.getkey('chatgpt','azure_v_token'),
+                            azureoai_key.getkey('chatgpt','azure_x_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_x_model1'), azureoai_key.getkey('chatgpt','azure_x_token1'),
+                            azureoai_key.getkey('chatgpt','azure_x_model2'), azureoai_key.getkey('chatgpt','azure_x_token2'),
                             )
         print('authenticate:', res, )
         if (res == True):
@@ -2806,7 +2806,7 @@ if __name__ == '__main__':
                     if (module_dic['onoff'] == 'on'):
                         function_modules.append(module_dic)
 
-            if False:
+            if True:
                 sysText = None
                 reqText = ''
                 inpText = 'おはようございます。'
@@ -2814,136 +2814,9 @@ if __name__ == '__main__':
                 print('[Request]')
                 print(reqText, inpText )
                 print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='chat', model_select='auto', 
-                                        session_id='guest1', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if True:
-                sysText = None
-                reqText = ''
-                inpText = '今日は何月何日？'
-                filePath = []
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='chat', model_select='auto', 
-                                        session_id='admin', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if False:
-                sysText = None
-                reqText = ''
-                inpText = 'この画像はなんだと思いますか？'
-                filePath = ['_icons/dog.jpg', '_icons/kyoto.png']
-                print()
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='vision', model_select='auto', 
-                                        session_id='admin', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if False:
-                sysText = None
-                reqText = ''
-                inpText = 'riki,おはようございます。'
-                filePath = []
-                print()
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                        session_id='guest1', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if True:
-                sysText = None
-                reqText = ''
-                #inpText = 'riki,今日は何月何日？'
-                inpText = 'riki,日本の主要３都市の天気？'
-                filePath = []
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                        session_id='admin', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if False:
-                sysText = None
-                reqText = ''
-                inpText = 'riki,この画像はなんだと思いますか？'
-                filePath = ['_icons/dog.jpg', '_icons/kyoto.png']
-                print()
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                        session_id='admin', history=openaiAPI.history, function_modules=function_modules,
-                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
-                                        inpLang='ja', outLang='ja', )
-                print()
-                print('[' + res_name + '] (' + res_api + ')' )
-                print('', res_text)
-                print()
-
-            if False:
-                sysText = None
-                reqText = ''
-                #inpText = 'riki,おはようございます。'
-                #inpText = '計算式 123 * 456 * (7 + 8) の答え？'
-                #inpText = 'riki,東京の天気？'
-                #inpText = 'gpt4,日本の主要３都市の天気？'
-                inpText = 'riki,今日は何月何日？'
-                #inpText = 'riki,私のニックネームを覚えていますか？'
-                #inpText = 'riki,小説でマインは何階に住んでいますか？'
-                #inpText = 'riki,かわいい猫の画像生成して、その画像を言葉で説明して'
-                #inpText = '保存してあるClip&GPTのナレッジ文書を検索して、日本語で起動方法教えて'
-                #inpText = 'ランダムな数値での折れ線グラフ出力するプログラム生成。\n生成後に実行\n実行結果の画像と使ったソースをください。'
-                #inpText = 'guiですぐに遊べるリバーシプログラムの生成お願いします。最後にソースをください。'
-                filePath = []
-                # 2023/11/12時点添付ファイルの処理には課題あり
-                # 2023/11/18時点添付ファイルの処理には課題解消
-                #inpText = 'riki,送信してある売上のcsvファイルの総合計を計算してください'
-                #filePath = ['_icons/test_sales.csv',]
-                print()
-                print('[Request]')
-                print(reqText, inpText )
-                print()
-                res_text, res_path, res_files, res_name, res_api, openaiAPI.history = \
-                    openaiAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                        session_id='admin', history=openaiAPI.history, function_modules=function_modules,
+                res_text, res_path, res_files, res_name, res_api, azureAPI.history = \
+                    azureAPI.chatBot(  chat_class='chat', model_select='auto', 
+                                        session_id='guest1', history=azureAPI.history, function_modules=function_modules,
                                         sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                         inpLang='ja', outLang='ja', )
                 print()
@@ -2953,9 +2826,9 @@ if __name__ == '__main__':
 
             if True:
                 print('[History]')
-                for h in range(len(openaiAPI.history)):
-                    print(openaiAPI.history[h])
-                openaiAPI.history = []
+                for h in range(len(azureAPI.history)):
+                    print(azureAPI.history[h])
+                azureAPI.history = []
 
             if False:
                 res, msg = botFunc.functions_unload()

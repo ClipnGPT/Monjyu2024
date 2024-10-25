@@ -99,7 +99,7 @@ import speech_bot_function
 
 # コアAIのポート番号設定
 CORE_PORT = 8000
-SUB_BASE  = 8010
+SUB_BASE  = 8100
 
 # 実行モードの設定
 #runMode = 'debug'
@@ -205,6 +205,10 @@ if __name__ == '__main__':
         if res != True or msg != '':
             print(msg)
             print()
+        res, msg = addin.addins_reset()
+        if res != True or msg != '':
+            print(msg)
+            print()
 
         # botFunction 初期化
         botFunc = speech_bot_function.botFunction()
@@ -213,40 +217,58 @@ if __name__ == '__main__':
         if res != True or msg != '':
             print(msg)
             print()
+        res, msg = botFunc.functions_reset()
+        if res != True or msg != '':
+            print(msg)
+            print()
 
+        # key2RealTimeAPI
+        ext_module = addin.addin_modules.get('monjyu_UI_key2RealTimeAPI', None)
+        if (ext_module is not None):
+            try:
+                if (ext_module['onoff'] == 'on'):
+                    func_reset = ext_module['func_reset']
+                    res  = func_reset(botFunc=botFunc, )
+                    print('reset', 'monjyu_UI_key2RealTimeAPI')
+            except Exception as e:
+                print(e)
+
+    # サブAI起動
+    if True:
         # サブプロフィール設定(ランダム)
         subai_profiles = random.sample(range(int(numSubAIs)), int(numSubAIs))
 
-    # サブAI起動
-    subai_class = {}
-    subai_thread = {}
-    for n in range(int(numSubAIs)):
-        self_port = str(SUB_BASE + n + 1)
-        subai_class[n] = RiKi_Monjyu__subai.SubAiClass(runMode=runMode, qLog_fn=qLog_fn,
-                                                       main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                       core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
-                                                       self_port=self_port, profile_number=subai_profiles[n])
-        subai_thread[n] = threading.Thread(target=subai_class[n].run)
-        subai_thread[n].daemon = True
-        subai_thread[n].start()
+        subai_class = {}
+        subai_thread = {}
+        for n in range(int(numSubAIs)):
+            self_port = str(SUB_BASE + n + 1)
+            subai_class[n] = RiKi_Monjyu__subai.SubAiClass(runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
+                                                        self_port=self_port, profile_number=subai_profiles[n])
+            subai_thread[n] = threading.Thread(target=subai_class[n].run)
+            subai_thread[n].daemon = True
+            subai_thread[n].start()
 
     # コアAI起動
-    coreai_class = RiKi_Monjyu__coreai.CoreAiClass(runMode=runMode, qLog_fn=qLog_fn,
-                                                   main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                   core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-    coreai_thread = threading.Thread(target=coreai_class.run)
-    coreai_thread.daemon = True
-    coreai_thread.start()
+    if True:
+        coreai_class = RiKi_Monjyu__coreai.CoreAiClass(runMode=runMode, qLog_fn=qLog_fn,
+                                                    main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
+                                                    core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai_thread = threading.Thread(target=coreai_class.run)
+        coreai_thread.daemon = True
+        coreai_thread.start()
 
     # ウェブUI起動
-    self_port = str(CORE_PORT + 8)
-    webui_class = RiKi_Monjyu__webui.WebUiClass(runMode=runMode, qLog_fn=qLog_fn,
-                                                main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
-                                                self_port=self_port)
-    webui_thread = threading.Thread(target=webui_class.run)
-    webui_thread.daemon = True
-    webui_thread.start()
+    if True:
+        self_port = str(CORE_PORT + 8)
+        webui_class = RiKi_Monjyu__webui.WebUiClass(runMode=runMode, qLog_fn=qLog_fn,
+                                                    main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
+                                                    core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
+                                                    self_port=self_port)
+        webui_thread = threading.Thread(target=webui_class.run)
+        webui_thread.daemon = True
+        webui_thread.start()
 
     # 起動メッセージ
     qLog.log('info', main_id, 'Welcome Monjyu! Please access "http://localhost:8008/" in your browser.')

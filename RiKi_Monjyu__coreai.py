@@ -115,6 +115,18 @@ class ResultDataModel(BaseModel):
 class UserIdModel(BaseModel):
     user_id: str
 
+# input_logモデル
+class InputLogModel(BaseModel):
+    user_id: str
+    request_text: str
+    input_text: str
+
+# output_logモデル
+class OutputLogModel(BaseModel):
+    user_id: str
+    output_text: str
+    output_data: str
+
 # クリップファイル名モデル
 class postClipNamesModel(BaseModel):
     user_id: str
@@ -128,7 +140,7 @@ class postClipTextModel(BaseModel):
 class CoreAiProcess:
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None,
-                        core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48', ):
+                        core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
         coreai_class = CoreAiClass( runMode=runMode, qLog_fn=qLog_fn,
                                     main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
@@ -145,7 +157,7 @@ class CoreAiClass:
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None,
-                        core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48', ):
+                        core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
         self_port = core_port
 
@@ -214,6 +226,8 @@ class CoreAiClass:
         self.app.post("/post_reset")(self.post_reset)
         self.app.post("/post_cancel")(self.post_cancel)
         self.app.post("/post_clear")(self.post_clear)
+        self.app.post("/post_input_log")(self.post_input_log)
+        self.app.post("/post_output_log")(self.post_output_log)
         self.app.post("/post_clip_names")(self.post_clip_names)
         self.app.post("/post_clip_text")(self.post_clip_text)
 
@@ -258,6 +272,9 @@ class CoreAiClass:
         if (req_mode == 'chat'):
             if self.chat_class.perplexity_enable is None:
                 self.chat_class.perplexity_auth()
+                if not self.chat_class.perplexity_enable:
+                    self.data.perplexity_enable = self.chat_class.perplexity_enable
+                    self.data._reset()
             if self.chat_class.perplexity_enable:
                 models['[perplexity]'] = '[Perplexity]'
                 if self.chat_class.perplexityAPI.perplexity_a_enable and self.chat_class.perplexityAPI.perplexity_a_nick_name:
@@ -272,6 +289,9 @@ class CoreAiClass:
         if (req_mode == 'chat'):
             if self.chat_class.openai_enable is None:
                 self.chat_class.openai_auth()
+                if not self.chat_class.openai_enable:
+                    self.data.openai_enable = self.chat_class.openai_enable
+                    self.data._reset()
             if self.chat_class.openai_enable:
                 models['[openai]'] = '[OpenAI]'
                 if self.chat_class.openaiAPI.gpt_a_nick_name:
@@ -284,8 +304,25 @@ class CoreAiClass:
                     models[self.chat_class.openaiAPI.gpt_x_nick_name.lower()] = ' ' + self.chat_class.openaiAPI.gpt_x_nick_name
 
         if (req_mode == 'chat'):
+            if self.chat_class.azureoai_enable is None:
+                self.chat_class.azureoai_auth()
+            if self.chat_class.azureoai_enable:
+                models['[azure]'] = '[Azure]'
+                if self.chat_class.azureAPI.gpt_a_nick_name:
+                    models[self.chat_class.azureAPI.gpt_a_nick_name.lower()] = ' ' + self.chat_class.azureAPI.gpt_a_nick_name
+                if self.chat_class.azureAPI.gpt_b_nick_name:
+                    models[self.chat_class.azureAPI.gpt_b_nick_name.lower()] = ' ' + self.chat_class.azureAPI.gpt_b_nick_name
+                if self.chat_class.azureAPI.gpt_v_nick_name:
+                    models[self.chat_class.azureAPI.gpt_v_nick_name.lower()] = ' ' + self.chat_class.azureAPI.gpt_v_nick_name
+                if self.chat_class.azureAPI.gpt_x_nick_name:
+                    models[self.chat_class.azureAPI.gpt_x_nick_name.lower()] = ' ' + self.chat_class.azureAPI.gpt_x_nick_name
+
+        if (req_mode == 'chat'):
             if self.chat_class.claude_enable is None:
                 self.chat_class.claude_auth()
+                if not self.chat_class.claude_enable:
+                    self.data.claude_enable = self.chat_class.claude_enable
+                    self.data._reset()
             if self.chat_class.claude_enable:
                 models['[claude]'] = '[Claude]'
                 if self.chat_class.claudeAPI.claude_a_enable and self.chat_class.claudeAPI.claude_a_nick_name:
@@ -1099,6 +1136,54 @@ class CoreAiClass:
         self._text_clear(user_id=user_id, req_mode='CLEAR')
         return JSONResponse(content={'message': 'post_clear successfully'})
 
+    async def post_input_log(self, postData: InputLogModel):
+        """
+        input_logを更新する。
+        """
+        if (self.data is None):
+            raise HTTPException(status_code=503, detail='Service Unavailable')
+
+        user_id = postData.user_id
+        request_text = postData.request_text
+        input_text = postData.input_text
+        now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+        self.data.subai_input_log_key += 1
+        self.data.subai_input_log_all[self.data.subai_input_log_key] = {
+                "user_id": user_id, "from_port": self.core_port, "to_post": self.core_port,
+                "req_mode": 'log',
+                "inp_time": now_time, 
+                "sys_text": 'あなたは美しい日本語を話す賢いアシスタントです。', 
+                "req_text": request_text, 
+                "inp_text": input_text,
+                "upd_time": now_time, "dsp_time": None, }
+
+        # 処理結果
+        return JSONResponse(content={'message': 'post_input_log successfully'})
+
+    async def post_output_log(self, postData: OutputLogModel):
+        """
+        output_logを更新する。
+        """
+        if (self.data is None):
+            raise HTTPException(status_code=503, detail='Service Unavailable')
+
+        user_id = postData.user_id
+        output_text = postData.output_text
+        output_data = postData.output_data
+        now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+
+        self.data.subai_output_log_key += 1
+        self.data.subai_output_log_all[self.data.subai_output_log_key] = {
+            "user_id": user_id, "from_port": self.core_port, "to_post": self.core_port,
+            "req_mode": 'log',
+            "out_time": now_time, "out_text": output_text, "out_data": output_data,
+            "status": None,
+            "upd_time": now_time, "dsp_time": None, }
+
+        # 処理結果
+        return JSONResponse(content={'message': 'post_input_log successfully'})
+
     def _text_clear(self, user_id: str, req_mode: str):
         """
         ログと表示内容のクリア処理。
@@ -1311,7 +1396,7 @@ class CoreAiClass:
 
 if __name__ == '__main__':
     core_port = '8000'
-    sub_base  = '8010'
+    sub_base  = '8100'
     numSubAIs = '48'
 
     coreai = CoreAiProcess( runMode='debug', qLog_fn='', 

@@ -462,6 +462,8 @@ class _claudeAPI:
                         res_api  = self.claude_x_model
         elif (inpText.strip()[:7].lower() == ('openai,')):
             inpText = inpText.strip()[7:]
+        elif (inpText.strip()[:6].lower() == ('azure,')):
+            inpText = inpText.strip()[6:]
         elif (inpText.strip()[:7].lower() == ('claude,')):
             inpText = inpText.strip()[7:]
         elif (inpText.strip()[:7].lower() == ('gemini,')):

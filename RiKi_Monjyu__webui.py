@@ -121,7 +121,7 @@ class WebUiProcess:
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None,
-                        core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48', 
+                        core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', 
                         self_port: str = '8008'):
 
         # Web UIクラスのインスタンス化とスレッドの開始
@@ -143,7 +143,7 @@ class WebUiClass:
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None,
-                        core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48', 
+                        core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', 
                         self_port: str = '8008', ):
         self.runMode = runMode
 
@@ -703,7 +703,7 @@ class WebUiClass:
 
 if __name__ == '__main__':
     core_port = '8000'
-    sub_base  = '8010'
+    sub_base  = '8100'
     numSubAIs = '48'
 
     # Web UIプロセスの開始

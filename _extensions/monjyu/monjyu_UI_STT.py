@@ -32,6 +32,7 @@ import pygame
 qPath_stt    = 'temp/s6_4stt_txt/'
 
 # 定数の定義
+CORE_PORT = '8000'
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
 
@@ -231,10 +232,9 @@ class _monjyu_class:
         self.runMode   = runMode
 
         # ポート設定等
-        self.core_port  = '8000'
-        self.local_endpoint = f'http://localhost:{ self.core_port }'
-        self.webui_port = str(int(self.core_port) + 8)
-        self.webui_endpoint = self.local_endpoint.replace(self.core_port, self.webui_port)
+        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
+        self.webui_port = str(int(CORE_PORT) + 8)
+        self.webui_endpoint = self.local_endpoint.replace(CORE_PORT, self.webui_port)
 
     def request(self, req_mode='chat', user_id='admin', sysText='', reqText='', inpText='', ):
         res_port = None
@@ -261,7 +261,7 @@ class _monjyu_class:
         try:
             response = requests.post(
                 self.local_endpoint + '/post_req',
-                json={'user_id': user_id, 'from_port': self.core_port, 'to_port': self.core_port,
+                json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': CORE_PORT,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
                     'file_names': file_names, 'result_savepath': '', 'result_schema': '', },
@@ -270,9 +270,9 @@ class _monjyu_class:
             if response.status_code == 200:
                 res_port = str(response.json()['port'])
             else:
-                print('error', f"Error response ({self.core_port}/post_request) : {response.status_code} - {response.text}")
+                print('error', f"Error response ({ CORE_PORT }/post_request) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({self.core_port}/post_request) : {e}")
+            print('error', f"Error communicating ({ CORE_PORT }/post_request) : {e}")
         return res_port
 
 

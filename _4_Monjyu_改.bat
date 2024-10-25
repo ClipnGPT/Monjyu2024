@@ -41,11 +41,14 @@ ECHO -------
     python -m pip  install --upgrade pynput
 
 rem python -m pip  install --upgrade numpy
-    python -m pip  install --upgrade numpy==1.26.4
+rem python -m pip  install --upgrade numpy==1.26.4
+    python -m pip  install --upgrade numpy==2.0.2
 rem python -m pip  install --upgrade opencv-python
 rem python -m pip  install --upgrade opencv-contrib-python
-    python -m pip  install --upgrade opencv-python==4.9.0.80
-    python -m pip  install --upgrade opencv-contrib-python==4.9.0.80
+rem python -m pip  install --upgrade opencv-python==4.9.0.80
+rem python -m pip  install --upgrade opencv-contrib-python==4.9.0.80
+    python -m pip  install --upgrade opencv-python==4.10.0.84
+    python -m pip  install --upgrade opencv-contrib-python==4.10.0.84
 
     python -m pip  install --upgrade pysimplegui
     python -m pip  install --upgrade pillow

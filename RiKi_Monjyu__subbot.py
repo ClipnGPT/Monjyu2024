@@ -46,6 +46,8 @@ import speech_bot_perplexity
 import speech_bot_perplexity_key as perplexity_key
 import speech_bot_openai
 import speech_bot_openai_key as openai_key
+import speech_bot_azureoai
+import speech_bot_azureoai_key as azureoai_key
 import speech_bot_claude
 import speech_bot_claude_key as claude_key
 import speech_bot_gemini
@@ -106,6 +108,7 @@ class ChatClass:
         self.freeai_enable = None
         self.perplexity_enable = None
         self.openai_enable = None
+        self.azureoai_enable = None
         self.claude_enable = None
         self.gemini_enable = None
         self.ollama_enable = None
@@ -273,6 +276,92 @@ class ChatClass:
             qLog.log('error', self.proc_id, 'openai (ChatGPT) authenticate NG!')
 
         return self.openai_enable
+
+    def azureoai_auth(self):
+        """
+        azureoai 認証
+        """
+
+        # openai 定義
+        self.azureAPI = speech_bot_azureoai.AzureOaiAPI()
+        self.azureAPI.init(log_queue=None)
+
+        # openai 認証情報
+        api_type      = openai_key.getkey('chatgpt','openai_api_type')
+        organization  = openai_key.getkey('chatgpt','openai_organization')
+        openai_key_id = openai_key.getkey('chatgpt','openai_key_id')
+        endpoint      = openai_key.getkey('chatgpt','azure_endpoint')
+        version       = openai_key.getkey('chatgpt','azure_version')
+        azure_key_id  = openai_key.getkey('chatgpt','azure_key_id'),
+        if (self.conf.openai_api_type != ''):
+            api_type = self.conf.openai_api_type
+        if (self.conf.openai_organization not in ['', '< your openai organization >']):
+            organization = self.conf.openai_organization
+        if (self.conf.openai_key_id not in ['', '< your openai key >']):
+            openai_key_id = self.conf.openai_key_id
+        if (self.conf.azure_endpoint not in ['', '< your azure endpoint base >']):
+            endpoint = self.conf.azure_endpoint
+        if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
+            version = self.conf.azure_version
+        if (self.conf.azure_key_id not in ['', '< your azure key >']):
+            azure_key_id = self.conf.azure_key_id
+
+        # azureoai 認証実行
+        if (api_type != 'azure'):
+            res = self.azureAPI.authenticate('chatgpt',
+                            api_type,
+                            azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
+                            azureoai_key.getkey('chatgpt','openai_auto_continue'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            organization, openai_key_id,
+                            endpoint, version, azure_key_id,
+                            azureoai_key.getkey('chatgpt','gpt_a_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model1'), azureoai_key.getkey('chatgpt','gpt_a_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model2'), azureoai_key.getkey('chatgpt','gpt_a_token2'),
+                            azureoai_key.getkey('chatgpt','gpt_a_model3'), azureoai_key.getkey('chatgpt','gpt_a_token3'),
+                            azureoai_key.getkey('chatgpt','gpt_b_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model1'), azureoai_key.getkey('chatgpt','gpt_b_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model2'), azureoai_key.getkey('chatgpt','gpt_b_token2'),
+                            azureoai_key.getkey('chatgpt','gpt_b_model3'), azureoai_key.getkey('chatgpt','gpt_b_token3'),
+                            azureoai_key.getkey('chatgpt','gpt_b_length'),
+                            azureoai_key.getkey('chatgpt','gpt_v_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_v_model'), azureoai_key.getkey('chatgpt','gpt_v_token'),
+                            azureoai_key.getkey('chatgpt','gpt_x_nick_name'),
+                            azureoai_key.getkey('chatgpt','gpt_x_model1'), azureoai_key.getkey('chatgpt','gpt_x_token1'),
+                            azureoai_key.getkey('chatgpt','gpt_x_model2'), azureoai_key.getkey('chatgpt','gpt_x_token2'),
+                            )
+        else:
+            res = self.azureAPI.authenticate('chatgpt',
+                            api_type,
+                            azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
+                            azureoai_key.getkey('chatgpt','openai_auto_continue'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            organization, openai_key_id,
+                            endpoint, version, azure_key_id,
+                            azureoai_key.getkey('chatgpt','azure_a_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_a_model1'), azureoai_key.getkey('chatgpt','azure_a_token1'),
+                            azureoai_key.getkey('chatgpt','azure_a_model2'), azureoai_key.getkey('chatgpt','azure_a_token2'),
+                            azureoai_key.getkey('chatgpt','azure_a_model3'), azureoai_key.getkey('chatgpt','azure_a_token3'),
+                            azureoai_key.getkey('chatgpt','azure_b_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_b_model1'), azureoai_key.getkey('chatgpt','azure_b_token1'),
+                            azureoai_key.getkey('chatgpt','azure_b_model2'), azureoai_key.getkey('chatgpt','azure_b_token2'),
+                            azureoai_key.getkey('chatgpt','azure_b_model3'), azureoai_key.getkey('chatgpt','azure_b_token3'),
+                            azureoai_key.getkey('chatgpt','azure_b_length'),
+                            azureoai_key.getkey('chatgpt','azure_v_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_v_model'), azureoai_key.getkey('chatgpt','azure_v_token'),
+                            azureoai_key.getkey('chatgpt','azure_x_nick_name'),
+                            azureoai_key.getkey('chatgpt','azure_x_model1'), azureoai_key.getkey('chatgpt','azure_x_token1'),
+                            azureoai_key.getkey('chatgpt','azure_x_model2'), azureoai_key.getkey('chatgpt','azure_x_token2'),
+                            )
+
+        if res == True:
+            self.azureoai_enable = True
+            #qLog.log('info', self.proc_id, 'azure (openai) authenticate OK!')
+        else:
+            self.azureoai_enable = False
+            qLog.log('error', self.proc_id, 'azure (openai) authenticate NG!')
+
+        return self.azureoai_enable
 
     def claude_auth(self):
         """
@@ -514,6 +603,8 @@ class ChatClass:
             self.perplexity_auth()
         if (self.openai_enable is None):
             self.openai_auth()
+        if (self.azureoai_enable is None):
+            self.azureoai_auth()
         if (self.claude_enable is None):
             self.claude_auth()
         if (self.gemini_enable is None):
@@ -690,6 +781,74 @@ class ChatClass:
                     qLog.log('info', self.proc_id, 'chatBot openai ...')
                     res_text, res_path, res_files, nick_name, model_name, res_history = \
                         self.openaiAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
+                                                    history=history, function_modules=function_modules,
+                                                    sysText=sysText, reqText=reqText, inpText=inpText2,
+                                                    filePath=filePath, jsonSchema=jsonSchema, inpLang=inpLang, outLang=outLang, )
+                except Exception as e:
+                    qLog.log('error', self.proc_id, str(e))
+
+        if (self.azureoai_enable == True):
+            if (engine == '[azure]'):
+                engine_text = 'azure,\n'
+            else:
+                model_nick_name1 = 'azure'
+                a_nick_name = self.azureAPI.gpt_a_nick_name.lower()
+                b_nick_name = self.azureAPI.gpt_b_nick_name.lower()
+                v_nick_name = self.azureAPI.gpt_v_nick_name.lower()
+                x_nick_name = self.azureAPI.gpt_x_nick_name.lower()
+                if (engine != ''):
+                    if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
+                        engine_text = a_nick_name + ',\n'
+                    elif ((len(b_nick_name) != 0) and (engine.lower() == b_nick_name)):
+                        engine_text = b_nick_name + ',\n'
+                    elif ((len(v_nick_name) != 0) and (engine.lower() == v_nick_name)):
+                        engine_text = v_nick_name + ',\n'
+                    elif ((len(x_nick_name) != 0) and (engine.lower() == x_nick_name)):
+                        engine_text = x_nick_name + ',\n'
+                if (engine_text == '') and (reqText.find(',') >= 1):
+                    req_nick_name = reqText[:reqText.find(',')].lower()
+                    if   (req_nick_name == model_nick_name1):
+                        engine_text = model_nick_name1 + ',\n'
+                        reqText = reqText[len(model_nick_name1)+1:].strip()
+                    elif (len(a_nick_name) != 0) and (req_nick_name == a_nick_name):
+                        engine_text = a_nick_name + ',\n'
+                        reqText = reqText[len(a_nick_name)+1:].strip()
+                    elif (len(b_nick_name) != 0) and (req_nick_name == b_nick_name):
+                        engine_text = b_nick_name + ',\n'
+                        reqText = reqText[len(b_nick_name)+1:].strip()
+                    elif (len(v_nick_name) != 0) and (req_nick_name == v_nick_name):
+                        engine_text = v_nick_name + ',\n'
+                        reqText = reqText[len(v_nick_name)+1:].strip()
+                    elif (len(x_nick_name) != 0) and (req_nick_name == x_nick_name):
+                        engine_text = x_nick_name + ',\n'
+                        reqText = reqText[len(x_nick_name)+1:].strip()
+                if (engine_text == '') and (inpText.find(',') >= 1):
+                    inp_nick_name = inpText[:inpText.find(',')].lower()
+                    if   (inp_nick_name == model_nick_name1):
+                        engine_text = model_nick_name1 + ',\n'
+                        inpText = inpText[len(model_nick_name1)+1:].strip()
+                    elif (len(a_nick_name) != 0) and (inp_nick_name == a_nick_name):
+                        engine_text = a_nick_name + ',\n'
+                        inpText = inpText[len(a_nick_name)+1:].strip()
+                    elif (len(b_nick_name) != 0) and (inp_nick_name == b_nick_name):
+                        engine_text = b_nick_name + ',\n'
+                        inpText = inpText[len(b_nick_name)+1:].strip()
+                    elif (len(v_nick_name) != 0) and (inp_nick_name == v_nick_name):
+                        engine_text = v_nick_name + ',\n'
+                        inpText = inpText[len(v_nick_name)+1:].strip()
+                    elif (len(x_nick_name) != 0) and (inp_nick_name == x_nick_name):
+                        engine_text = x_nick_name + ',\n'
+                        inpText = inpText[len(x_nick_name)+1:].strip()
+
+            if (engine_text != ''):
+                inpText2 = engine_text + inpText
+                engine_text = ''
+                # run_gptでなくchatBotなのでモデル自動選択されます。
+
+                try:
+                    qLog.log('info', self.proc_id, 'chatBot azure ...')
+                    res_text, res_path, res_files, nick_name, model_name, res_history = \
+                        self.azureAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
                                                     history=history, function_modules=function_modules,
                                                     sysText=sysText, reqText=reqText, inpText=inpText2,
                                                     filePath=filePath, jsonSchema=jsonSchema, inpLang=inpLang, outLang=outLang, )

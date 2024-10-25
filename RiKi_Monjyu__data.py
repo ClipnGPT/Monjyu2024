@@ -43,7 +43,7 @@ REQUEST_TIMEOUT = 30
 
 class _data_class:
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
-                        core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48', ):
+                        core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
 
         # ログ設定
@@ -83,6 +83,9 @@ class _data_class:
         self.subai_histories_all  = {}
 
         # 設定の保存
+        self.perplexity_enable = True
+        self.claude_enable = True
+        self.openai_enable = True
         self.mode_setting = {}
         self.addins_setting = {}
         self._reset()
@@ -113,6 +116,18 @@ class _data_class:
             "after_proc": "none,", "after_engine": "[claude]",
             "check_proc": "none,", "check_engine": "[openai]"
         }
+
+        if (self.perplexity_enable != True):
+            self.mode_setting['chat']['before_engine'] = ''
+            self.mode_setting['websearch']['before_engine'] = ''
+
+        if (self.claude_enable != True):
+            self.mode_setting['chat']['after_engine'] = ''
+            self.mode_setting['websearch']['after_engine'] = ''
+
+        if (self.openai_enable != True):
+            self.mode_setting['chat']['check_engine'] = ''
+            self.mode_setting['websearch']['check_engine'] = ''
 
         self.mode_setting['assistant'] = {
             "req_engine": "", 
@@ -262,7 +277,7 @@ class _data_class:
 
 if __name__ == '__main__':
     core_port = '8000'
-    sub_base  = '8010'
+    sub_base  = '8100'
     numSubAIs = '48'
 
     data = _data_class( runMode='debug', qLog_fn='', 

@@ -80,7 +80,7 @@ class RequestDataModel(BaseModel):
 class SubAiProcess:
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
                  main=None, conf=None, data=None, addin=None, botFunc=None,
-                 core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48'):
+                 core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48'):
         """ サブAIプロセスの初期化 """
         self.num_subais = int(num_subais)
         random_profile = random.sample(range(self.num_subais), self.num_subais)
@@ -104,7 +104,7 @@ class SubAiClass:
     """ サブAIクラス """
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
                  main=None, conf=None, data=None, addin=None, botFunc=None,
-                 core_port: str = '8000', sub_base: str = '8010', num_subais: str = '48',
+                 core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48',
                  self_port: str = '8011', profile_number: Optional[int] = None):
         self.runMode = runMode
 
@@ -526,7 +526,7 @@ class SubAiClass:
 
 if __name__ == '__main__':
     core_port = '8000'
-    sub_base  = '8010'
+    sub_base  = '8100'
     numSubAIs = '48'
     subai = SubAiProcess(runMode='debug', qLog_fn='', 
                          core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
