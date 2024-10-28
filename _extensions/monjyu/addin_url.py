@@ -18,8 +18,8 @@ try:
     url2text = 認証済_URLからテキスト取得._class()
 except:
     try:
-        #loader = importlib.machinery.SourceFileLoader('認証済_url_to_text.py', '_extensions/monjyu/認証済_URLからテキスト取得.py')
-        loader = importlib.machinery.SourceFileLoader('認証済_url_to_text.py', '_extensions/function/認証済_URLからテキスト取得.py')
+        #loader = importlib.machinery.SourceFileLoader('認証済_URLからテキスト取得.py', '_extensions/monjyu/認証済_URLからテキスト取得.py')
+        loader = importlib.machinery.SourceFileLoader('認証済_URLからテキスト取得.py', '_extensions/function/認証済_URLからテキスト取得.py')
         認証済_URLからテキスト取得 = loader.load_module()
         url2text  = 認証済_URLからテキスト取得._class()
     except:

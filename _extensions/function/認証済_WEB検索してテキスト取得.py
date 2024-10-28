@@ -22,7 +22,7 @@ ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
 from bs4 import BeautifulSoup
-import urllib.parse
+from urllib.parse import parse_qs  # 追加
 
 # 検索除外アドレス
 NOT_SEARCH = ['google.com',
@@ -35,12 +35,19 @@ NOT_SEARCH = ['google.com',
               'gbiz.go.jp',
               ]
 
+import importlib
+
 url2text = None
 try:
     import     認証済_URLからテキスト取得
     url2text = 認証済_URLからテキスト取得._class()
 except:
-    print('★認証済_URLからテキスト取得は利用できません！')
+    try:
+        loader = importlib.machinery.SourceFileLoader('認証済_URLからテキスト取得.py', '_extensions/function/認証済_URLからテキスト取得.py')
+        認証済_URLからテキスト取得 = loader.load_module()
+        url2text  = 認証済_URLからテキスト取得._class()
+    except:
+        print('★認証済_URLからテキスト取得は利用できません！')
 
 class _class:
 
@@ -106,7 +113,7 @@ class _class:
         # google 検索実行
         url_links = {}
         try:
-            url_path = "https://google.com/search?q=" + urllib.parse.quote(search_text)
+            url_path = "https://google.com/search?q=" + search_text
 
             html = requests.get(url_path, timeout=(5,15), verify=False)
             html_content   = html.content
@@ -118,7 +125,7 @@ class _class:
                 href = link.get('href')
                 if href and href.startswith('/url?'):  # google検索結果のリンクは/url?から始まる
                     # クエリパラメータを解析して、qパラメータの値を取得する
-                    query_params = urllib.parse.parse_qs(href.replace('/url?', ''))
+                    query_params = parse_qs(href.replace('/url?', ''))
                     if 'q' in query_params:
                         # 抽出したリンクの文字列の先頭がhttp://またはhttps://で始まる場合のみ追加
                         link_url = query_params['q'][0]

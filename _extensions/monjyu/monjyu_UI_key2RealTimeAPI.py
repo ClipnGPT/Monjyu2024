@@ -27,7 +27,17 @@ import threading
 from pynput import keyboard
 #from pynput.keyboard import Controller
 
+# Monjyu連携
 import requests
+
+# グラフ表示
+import numpy as np
+import tkinter as tk
+from tkinter import ttk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib
+matplotlib.use('TkAgg')
 
 
 
@@ -196,12 +206,17 @@ class _realtime_api_class:
         # realtime
         self.audio_send_queue = queue.Queue()
         self.audio_receive_queue = queue.Queue()
+        self.graph_input_queue = queue.Queue()
+        self.graph_output_queue = queue.Queue()
         self.break_flag = False
         self.ws = None
 
-        # ポート設定等
-        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
-        self.user_id = 'admin'
+        # monjyu
+        self.monjyu = _monjyu_class(runMode='assistant', )
+
+        # visualizer
+        self.visualizer = None
+        self.visualizer = _visualizer_class()
 
     def base64_to_pcm16(self, audio_base64):
         audio_data = base64.b64decode(audio_base64)
@@ -210,6 +225,50 @@ class _realtime_api_class:
     def pcm16_to_base64(self, audio_data):
         audio_base64 = base64.b64encode(audio_data).decode("utf-8")
         return audio_base64
+
+    def input_audio_to_queue(self, input_stream, CHUNK):
+        try:
+            while (not self.ws is None) and (not self.break_flag):
+                audio_data = input_stream.read(CHUNK, exception_on_overflow=False)
+                self.audio_send_queue.put(audio_data)
+                self.graph_input_queue.put(audio_data)
+                time.sleep(0.01)
+        except Exception as e:
+            print(f"input_audio_to_queue: {e}")
+        self.break_flag = True
+        return True
+
+    def send_audio_from_queue(self):
+        try:
+            while (not self.ws is None) and (not self.break_flag):
+                audio_data = self.audio_send_queue.get()
+                if audio_data is None:
+                    continue
+                
+                audio_base64 = self.pcm16_to_base64(audio_data)
+                audio_event = {
+                    "type": "input_audio_buffer.append",
+                    "audio": audio_base64
+                }
+                self.ws.send(json.dumps(audio_event))
+                time.sleep(0.01)
+        except Exception as e:
+            print(f"send_audio_from_queue: {e}")
+        self.break_flag = True
+        return True
+
+    def output_audio_from_queue(self, output_stream):
+        try:
+            while (not self.ws is None) and (not self.break_flag):
+                audio_data = self.audio_receive_queue.get()
+                if audio_data:
+                    output_stream.write(audio_data)
+                    self.graph_output_queue.put(audio_data)
+                time.sleep(0.01)
+        except Exception as e:
+            print(f"output_audio_from_queue: {e}")
+        self.break_flag = True
+        return True
 
     def send_request(self, request_text='',):
         if (request_text is not None) and (request_text != ''):
@@ -242,33 +301,9 @@ class _realtime_api_class:
 
         return True
 
-    def input_audio_to_queue(self, input_stream, CHUNK):
-        try:
-            while (not self.ws is None) and (not self.break_flag):
-                audio_data = input_stream.read(CHUNK, exception_on_overflow=False)
-                self.audio_send_queue.put(audio_data)
-        except Exception as e:
-            print(f"input_audio_to_queue: {e}")
-        self.break_flag = True
-        return True
-
-    def send_audio_from_queue(self):
-        try:
-            while (not self.ws is None) and (not self.break_flag):
-                audio_data = self.audio_send_queue.get()
-                if audio_data is None:
-                    continue
-                
-                audio_base64 = self.pcm16_to_base64(audio_data)
-                audio_event = {
-                    "type": "input_audio_buffer.append",
-                    "audio": audio_base64
-                }
-                self.ws.send(json.dumps(audio_event))
-                time.sleep(0.01)
-        except Exception as e:
-            print(f"send_audio_from_queue: {e}")
-        self.break_flag = True
+    def tools_debug(self):
+        time.sleep(5.00)
+        self.send_request(request_text='日本の３大都市の天気？', )
         return True
 
     def receive_proc(self):
@@ -284,20 +319,28 @@ class _realtime_api_class:
                         if   type == "response.audio.delta":
                             audio_base64_response = response_data["delta"]
                             if audio_base64_response:
-                                pcm16_audio = self.base64_to_pcm16(audio_base64_response)
-                                self.audio_receive_queue.put(pcm16_audio)
+                                audio_data = self.base64_to_pcm16(audio_base64_response)
+                                self.audio_receive_queue.put(audio_data)
                         elif type == "input_audio_buffer.speech_started":
-                            while not self.audio_receive_queue.empty():
-                                self.audio_receive_queue.get() 
+                            if not self.audio_receive_queue.empty():
+                                self.audio_receive_queue.queue.clear() 
+                            if not self.graph_output_queue.empty():
+                                self.graph_output_queue.queue.clear() 
                         elif type == "response.audio_transcript.delta":
                             pass # stream!
                         elif type == "response.audio_transcript.done":
                             print(f" Realtime : { transcript }")
-                            self.post_output_log(outText=transcript, outData=transcript)
+                            try:
+                                self.monjyu.post_output_log(outText=transcript, outData=transcript)
+                            except Exception as e:
+                                print(e)
 
                         elif type == "conversation.item.input_audio_transcription.completed":
                             print(f" Audio in : { transcript }")
-                            self.post_input_log(reqText=transcript, inpText='')
+                            try:
+                                self.monjyu.post_input_log(reqText=transcript, inpText='')
+                            except Exception as e:
+                                print(e)
 
                         elif type == "response.function_call_arguments.delta":
                             pass # stream!
@@ -385,17 +428,6 @@ class _realtime_api_class:
         self.break_flag = True
         return True
 
-    def output_audio_from_queue(self, output_stream):
-        try:
-            while (not self.ws is None) and (not self.break_flag):
-                pcm16_audio = self.audio_receive_queue.get()
-                if pcm16_audio:
-                    output_stream.write(pcm16_audio)
-        except Exception as e:
-            print(f"output_audio_from_queue: {e}")
-        self.break_flag = True
-        return True
-
     def start(self):
         self.main_thread = threading.Thread(target=self._main, daemon=True)
         self.main_thread.start()
@@ -408,6 +440,10 @@ class _realtime_api_class:
 
     def _main(self):
         try:
+            # visualizer開始
+            self.visualizer = _visualizer_class()
+            self.visualizer.api_instance = self  # 自身への参照を追加
+
             # 起動
             self.break_flag = False
             if (self.ws is None):
@@ -440,15 +476,20 @@ class _realtime_api_class:
                 }
                 self.ws.send(json.dumps(update_request))
 
+                self.audio_send_queue.queue.clear()
+                self.audio_receive_queue.queue.clear()
+                self.graph_input_queue.queue.clear()
+                self.graph_output_queue.queue.clear()
+
                 audio_stream = pyaudio.PyAudio()
                 input_stream = audio_stream.open(format=FORMAT, channels=CHANNELS, rate=INPUT_RATE, input=True, frames_per_buffer=INPUT_CHUNK)
                 output_stream = audio_stream.open(format=FORMAT, channels=CHANNELS, rate=OUTPUT_RATE, output=True, frames_per_buffer=OUTPUT_CHUNK)
 
                 threads = [
-                    threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
                     threading.Thread(target=self.send_audio_from_queue, daemon=True),
-                    threading.Thread(target=self.receive_proc, daemon=True),
                     threading.Thread(target=self.output_audio_from_queue, args=(output_stream,), daemon=True),
+                    threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
+                    threading.Thread(target=self.receive_proc, daemon=True),
                     threading.Thread(target=self.tools_debug, daemon=True)
                 ]
 
@@ -457,7 +498,19 @@ class _realtime_api_class:
 
             # 待機
             while (not self.break_flag):
-                time.sleep(1.00)
+                if not self.graph_input_queue.empty():
+                    input_data = self.graph_input_queue.get()
+                    self.visualizer.update_graph(input_chunk=input_data)
+                else:
+                    self.visualizer.update_graph(input_chunk=bytes(INPUT_CHUNK))
+                    
+                if not self.graph_output_queue.empty():
+                    output_data = self.graph_output_queue.get()
+                    self.visualizer.update_graph(output_chunk=output_data)
+                else:
+                    self.visualizer.update_graph(output_chunk=bytes(OUTPUT_CHUNK))
+                    
+                time.sleep(0.05)
 
         except Exception as e:
             print(f"_main: {e}")
@@ -468,6 +521,10 @@ class _realtime_api_class:
         #for thread in threads:
         #    thread.join()
         time.sleep(1.00)
+
+        # visualizer停止
+        self.visualizer.root.quit()
+        self.visualizer.root.destroy()
 
         # 解放
         input_stream.stop_stream()
@@ -480,6 +537,16 @@ class _realtime_api_class:
             self.ws = None
             print("WebSocketを切断しました。")
         return True
+
+
+
+class _monjyu_class:
+    def __init__(self, runMode='assistant' ):
+        self.runMode = runMode
+
+        # ポート設定等
+        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
+        self.user_id = 'admin'
 
     def post_input_log(self, reqText='', inpText=''):
         # AI要求送信
@@ -513,10 +580,86 @@ class _realtime_api_class:
             print('error', f"Error communicating ({ CORE_PORT }/post_output_log) : {e}")
         return True
 
-    def tools_debug(self):
-        time.sleep(5.00)
-        self.send_request(request_text='日本の３大都市の天気？', )
-        return True
+
+
+class _visualizer_class:
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Audio Visualizer")
+        
+        # ウィンドウクローズイベントのハンドラを追加
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+        # グラフ用のフレーム作成
+        self.frame = ttk.Frame(self.root)
+        self.frame.grid(row=0, column=0, sticky="nsew")
+                
+        # グラフの初期化を直接実行
+        self.initialize_plot()
+        
+    def initialize_plot(self):
+        # Matplotlibのfigure作成（サイズを512x512に修正）
+        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(5.12, 5.12))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # グラフの初期設定
+        self.ax1.set_title('Input Audio')
+        self.ax2.set_title('Output Audio')
+        
+        # 背景を黒に設定
+        self.fig.patch.set_facecolor('black')
+        self.ax1.set_facecolor('black')
+        self.ax2.set_facecolor('black')
+        
+        # グリッド線と軸の色を設定
+        self.ax1.grid(True, color='gray')
+        self.ax2.grid(True, color='gray')
+        self.ax1.tick_params(colors='white')
+        self.ax2.tick_params(colors='white')
+        for spine in self.ax1.spines.values():
+            spine.set_color('white')
+        for spine in self.ax2.spines.values():
+            spine.set_color('white')
+        
+        # タイトルの色を白に
+        self.ax1.set_title('Input Audio', color='white')
+        self.ax2.set_title('Output Audio', color='white')
+        
+        # 入力を赤、出力を青の棒グラフに設定
+        self.line1, = self.ax1.plot([], [], 'r', drawstyle='steps-pre')  # 赤色
+        self.line2, = self.ax2.plot([], [], 'b', drawstyle='steps-pre')  # 青色
+        
+        # Y軸の範囲設定（絶対値表示）
+        self.ax1.set_ylim(0, 32767)  # 16-bit audioの絶対値範囲
+        self.ax2.set_ylim(0, 32767)
+        
+        # データバッファ
+        self.input_data = []
+        self.output_data = []
+
+    def on_closing(self):
+        if hasattr(self, 'api_instance'):
+            self.api_instance.break_flag = True
+            
+    def update_graph(self, input_chunk=None, output_chunk=None):
+        if input_chunk is not None:
+            # 入力データの更新（絶対値に変換）
+            input_data = np.abs(np.frombuffer(input_chunk, dtype=np.int16))
+            self.input_data = input_data
+            self.line1.set_data(range(len(input_data)), input_data)
+            self.ax1.set_xlim(0, len(input_data))
+            
+        if output_chunk is not None:
+            # 出力データの更新（絶対値に変換）
+            output_data = np.abs(np.frombuffer(output_chunk, dtype=np.int16))
+            self.output_data = output_data
+            self.line2.set_data(range(len(output_data)), output_data)
+            self.ax2.set_xlim(0, len(output_data))
+            
+        self.canvas.draw()
+        self.root.update()
 
 
 

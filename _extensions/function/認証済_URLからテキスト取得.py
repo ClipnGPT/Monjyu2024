@@ -17,16 +17,10 @@ requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.
 
 import ssl
 import urllib
-
-## SSLエラーを無視するための処理
-#ssl_context = ssl.create_default_context()
-#ssl_context.check_hostname = False
-#ssl_context.verify_mode = ssl.CERT_NONE
-
-# urllibをブラウザ偽装するための処理
-opener=urllib.request.build_opener()
-opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
-urllib.request.install_opener(opener)
+# SSLエラーを無視するための処理
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 from bs4 import BeautifulSoup
 
@@ -96,8 +90,7 @@ class _class:
         else:
 
             text = ''
-            if True:
-            #try:
+            try:
 
                 # なろうページ？
                 narou_pages = ''
@@ -138,8 +131,7 @@ class _class:
                 # なろう
                 # -----------
                 if (narou_pages != ''):
-                    #html = urllib.request.urlopen(url_path, context=ssl_context, )
-                    html = urllib.request.urlopen(url_path)
+                    html = urllib.request.urlopen(url_path, context=ssl_context, )
                     soup = BeautifulSoup(html, 'html.parser')
 
                     # タイトル
@@ -177,8 +169,7 @@ class _class:
                 # 別の手法
                 # -----------
                 if (text == ''):
-                    #html = urllib.request.urlopen(url_path, context=ssl_context, )
-                    html = urllib.request.urlopen(url_path)
+                    html = urllib.request.urlopen(url_path, context=ssl_context, )
                     soup = BeautifulSoup(html, 'html.parser')
 
                     try:
@@ -189,9 +180,9 @@ class _class:
                     except:
                         pass
 
-            #except Exception as e:
-            #    print(e)
-            #    text = '!'
+            except Exception as e:
+                print(e)
+                text = '!'
 
             # 文書成形
             res_text = self.text_replace(text=text, )
@@ -212,30 +203,7 @@ class _class:
 
 
 
-    def text_replace(self, text=''):
-        if "```" not in text:
-            return self.text_replace_sub(text)
-        else:
-            # ```が2か所以上含まれている場合の処理
-            first_triple_quote_index = text.find("```")
-            last_triple_quote_index = text.rfind("```")
-            if first_triple_quote_index == last_triple_quote_index:
-                return self.text_replace_sub(text)
-            # textの先頭から最初の```までをtext_replace_subで成形
-            text_before_first_triple_quote = text[:first_triple_quote_index]
-            formatted_before = self.text_replace_sub(text_before_first_triple_quote)
-            formatted_before = formatted_before.strip() + '\n'
-            # 最初の```から最後の```の直前までを文字列として抽出
-            code_block = text[first_triple_quote_index : last_triple_quote_index]
-            code_block = code_block.strip() + '\n'
-            # 最後の```以降の部分をtext_replace_subで成形
-            text_after_last_triple_quote = text[last_triple_quote_index:]
-            formatted_after = self.text_replace_sub(text_after_last_triple_quote)
-            formatted_after = formatted_after.strip() + '\n'
-            # 結果を結合して戻り値とする
-            return (formatted_before + code_block + formatted_after).strip()
-
-    def text_replace_sub(self, text='', ):
+    def text_replace(self, text='', ):
         if (text.strip() == ''):
             return ''
 
@@ -276,12 +244,9 @@ class _class:
 if __name__ == '__main__':
 
     ext = _class()
+    print(ext.func_proc('{ "runMode" : "assistant" }'))
 
     print(ext.func_proc('{ ' \
                       + '"url_path" : "https://www.google.co.jp/"' \
-                      + ' }'))
-
-    print(ext.func_proc('{ ' \
-                      + '"url_path" : "https://ncode.syosetu.com/n4830bu/1/"' \
                       + ' }'))
 
