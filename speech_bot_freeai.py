@@ -51,7 +51,7 @@ class _freeaiAPI:
         self.freeai_default_class   = 'auto'
         self.freeai_auto_continue   = 3
         self.freeai_max_step        = 10
-        self.freeai_max_assistant   = 5
+        self.freeai_max_session     = 5
        
         self.freeai_key_id          = None
 
@@ -114,7 +114,7 @@ class _freeaiAPI:
                      freeai_api_type,
                      freeai_default_gpt, freeai_default_class,
                      freeai_auto_continue,
-                     freeai_max_step, freeai_max_assistant,
+                     freeai_max_step, freeai_max_session,
 
                      freeai_key_id,
 
@@ -136,8 +136,8 @@ class _freeaiAPI:
             self.freeai_auto_continue = int(freeai_auto_continue)
         if (str(freeai_max_step)      != 'auto'):
             self.freeai_max_step      = int(freeai_max_step)
-        if (str(freeai_max_assistant) != 'auto'):
-            self.freeai_max_assistant = int(freeai_max_assistant)
+        if (str(freeai_max_session) != 'auto'):
+            self.freeai_max_session   = int(freeai_max_session)
 
         # freeai チャットボット
         if (freeai_a_nick_name != ''):
@@ -920,7 +920,7 @@ if __name__ == '__main__':
                             api_type,
                             freeai_key.getkey('freeai','freeai_default_gpt'), freeai_key.getkey('freeai','freeai_default_class'),
                             freeai_key.getkey('freeai','freeai_auto_continue'),
-                            freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_assistant'),
+                            freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_session'),
                             freeai_key.getkey('freeai','freeai_key_id'),
                             freeai_key.getkey('freeai','freeai_a_nick_name'), freeai_key.getkey('freeai','freeai_a_model'), freeai_key.getkey('freeai','freeai_a_token'),
                             freeai_key.getkey('freeai','freeai_b_nick_name'), freeai_key.getkey('freeai','freeai_b_model'), freeai_key.getkey('freeai','freeai_b_token'),

@@ -48,7 +48,7 @@ class _plamoAPI:
         self.plamo_default_class    = 'auto'
         self.plamo_auto_continue    = 3
         self.plamo_max_step         = 10
-        self.plamo_max_assistant    = 5
+        self.plamo_max_session      = 5
        
         self.plamo_key_id           = None
 
@@ -105,7 +105,7 @@ class _plamoAPI:
                      plamo_api_type,
                      plamo_default_gpt, plamo_default_class,
                      plamo_auto_continue,
-                     plamo_max_step, plamo_max_assistant,
+                     plamo_max_step, plamo_max_session,
 
                      plamo_key_id,
 
@@ -127,8 +127,8 @@ class _plamoAPI:
             self.plamo_auto_continue    = int(plamo_auto_continue)
         if (str(plamo_max_step)      != 'auto'):
             self.plamo_max_step         = int(plamo_max_step)
-        if (str(plamo_max_assistant) != 'auto'):
-            self.plamo_max_assistant    = int(plamo_max_assistant)
+        if (str(plamo_max_session) != 'auto'):
+            self.plamo_max_session      = int(plamo_max_session)
 
         # plamo チャットボット
         if (plamo_a_nick_name != ''):
@@ -665,7 +665,7 @@ if __name__ == '__main__':
                             api_type,
                             plamo_key.getkey('plamo','plamo_default_gpt'), plamo_key.getkey('plamo','plamo_default_class'),
                             plamo_key.getkey('plamo','plamo_auto_continue'),
-                            plamo_key.getkey('plamo','plamo_max_step'), plamo_key.getkey('plamo','plamo_max_assistant'),
+                            plamo_key.getkey('plamo','plamo_max_step'), plamo_key.getkey('plamo','plamo_max_session'),
                             plamo_key.getkey('plamo','plamo_key_id'),
                             plamo_key.getkey('plamo','plamo_a_nick_name'), plamo_key.getkey('plamo','plamo_a_model'), plamo_key.getkey('plamo','plamo_a_token'),
                             plamo_key.getkey('plamo','plamo_b_nick_name'), plamo_key.getkey('plamo','plamo_b_model'), plamo_key.getkey('plamo','plamo_b_token'),

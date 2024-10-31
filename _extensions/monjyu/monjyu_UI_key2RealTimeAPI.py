@@ -215,7 +215,6 @@ class _realtime_api_class:
         self.monjyu = _monjyu_class(runMode='assistant', )
 
         # visualizer
-        self.visualizer = None
         self.visualizer = _visualizer_class()
 
     def base64_to_pcm16(self, audio_base64):
@@ -230,9 +229,11 @@ class _realtime_api_class:
         try:
             while (not self.ws is None) and (not self.break_flag):
                 audio_data = input_stream.read(CHUNK, exception_on_overflow=False)
-                self.audio_send_queue.put(audio_data)
-                self.graph_input_queue.put(audio_data)
-                time.sleep(0.01)
+                if audio_data is not None:
+                    self.audio_send_queue.put(audio_data)
+                    self.graph_input_queue.put(audio_data)
+                else:
+                    time.sleep(0.01)
         except Exception as e:
             print(f"input_audio_to_queue: {e}")
         self.break_flag = True
@@ -242,16 +243,15 @@ class _realtime_api_class:
         try:
             while (not self.ws is None) and (not self.break_flag):
                 audio_data = self.audio_send_queue.get()
-                if audio_data is None:
-                    continue
-                
-                audio_base64 = self.pcm16_to_base64(audio_data)
-                audio_event = {
-                    "type": "input_audio_buffer.append",
-                    "audio": audio_base64
-                }
-                self.ws.send(json.dumps(audio_event))
-                time.sleep(0.01)
+                if audio_data is not None:
+                    audio_base64 = self.pcm16_to_base64(audio_data)
+                    audio_event = {
+                        "type": "input_audio_buffer.append",
+                        "audio": audio_base64
+                    }
+                    self.ws.send(json.dumps(audio_event))
+                else:
+                    time.sleep(0.01)
         except Exception as e:
             print(f"send_audio_from_queue: {e}")
         self.break_flag = True
@@ -261,10 +261,11 @@ class _realtime_api_class:
         try:
             while (not self.ws is None) and (not self.break_flag):
                 audio_data = self.audio_receive_queue.get()
-                if audio_data:
+                if audio_data is not None:
                     output_stream.write(audio_data)
                     self.graph_output_queue.put(audio_data)
-                time.sleep(0.01)
+                else:
+                    time.sleep(0.01)
         except Exception as e:
             print(f"output_audio_from_queue: {e}")
         self.break_flag = True
@@ -275,25 +276,26 @@ class _realtime_api_class:
             print(f" User(text): { request_text }")
 
             try:
-                # text 送信
-                request = {
-                    "type": "conversation.item.create",
-                    "item": {
-                        "type": "message",
-                        "role": "user",
-                        "content": [ {
-                            "type": "input_text",
-                            "text": request_text, 
-                        } ]
-                    },
-                }
-                self.ws.send(json.dumps(request))
+                if (not self.ws is None) and (not self.break_flag):
+                    # text 送信
+                    request = {
+                        "type": "conversation.item.create",
+                        "item": {
+                            "type": "message",
+                            "role": "user",
+                            "content": [ {
+                                "type": "input_text",
+                                "text": request_text, 
+                            } ]
+                        },
+                    }
+                    self.ws.send(json.dumps(request))
 
-                # 送信通知
-                request = {
-                    "type": "response.create",
-                }
-                self.ws.send(json.dumps(request))
+                    # 送信通知
+                    request = {
+                        "type": "response.create",
+                    }
+                    self.ws.send(json.dumps(request))
 
             except Exception as e:
                 print(f"send_request: {e}")
@@ -428,6 +430,32 @@ class _realtime_api_class:
         self.break_flag = True
         return True
 
+    def visualizer_update(self):
+        try:
+            while (not self.ws is None) and (not self.break_flag):
+                try:
+                    if not self.graph_input_queue.empty():
+                        input_data = self.graph_input_queue.get()
+                        self.visualizer.update_value(input_chunk=input_data)
+                    else:
+                        self.visualizer.update_value(input_chunk=bytes(INPUT_CHUNK))
+                        
+                    if not self.graph_output_queue.empty():
+                        output_data = self.graph_output_queue.get()
+                        self.visualizer.update_value(output_chunk=output_data)
+                    else:
+                        self.visualizer.update_value(output_chunk=bytes(OUTPUT_CHUNK))
+
+                    #self.visualizer.update_graph()
+                except Exception as e:
+                    print(f"visualizer: {e}")
+                #time.sleep(0.01)
+        except Exception as e:
+            print(f"visualizer_update: {e}")
+            return False
+        self.break_flag = True
+        return True
+
     def start(self):
         self.main_thread = threading.Thread(target=self._main, daemon=True)
         self.main_thread.start()
@@ -450,18 +478,43 @@ class _realtime_api_class:
                 self.ws = websocket.create_connection(self.WS_URL, header=self.HEADERS)
                 print("WebSocketに接続しました。")
 
+                # Monjyu実行が可能か確認
+                ext_monjyu = False
+                instructions = \
+"""
+あなたは美しい日本語を話す賢いアシスタントです。
+あなたはRealTimeAPIで実行中のアシスタントです。
+"""
+                if self.botFunc is not None:
+                    for module_dic in self.botFunc.function_modules:
+                        if (module_dic['func_name'] == 'execute_monjyu_request'):
+                            ext_monjyu = True
+                            instructions = \
+"""
+あなたは美しい日本語を話す賢いアシスタントです。
+あなたはRealTimeAPIで実行中のアシスタントです。
+あなたはリアルタイム会話を中心に実行してください。
+あなた自身で回答できない場合は、全て外部AI実行ファンクション(execute_monjyu_request)を利用してしてください。
+"""
+                            break
+
+                # ツール設定 通常はexecute_monjyu_requestのみ有効として処理
                 tools = []
                 if self.botFunc is not None:
                     for module_dic in self.botFunc.function_modules:
-                        #print(module_dic['func_name'])
-                        tool = {'type': 'function'} | module_dic['function']
-                        tools.append( tool )
+                        if (ext_monjyu):
+                            if (module_dic['func_name'] == 'execute_monjyu_request'):
+                                tool = {'type': 'function'} | module_dic['function']
+                                tools.append( tool )
+                        else:
+                            tool = {'type': 'function'} | module_dic['function']
+                            tools.append( tool )
 
                 update_request = {
                     "type": "session.update",
                     "session": {
                         "modalities": ["audio", "text"],
-                        "instructions": "あなたは美しい日本語を話す賢いアシスタントです。",
+                        "instructions": instructions,
                         "voice": "alloy",
                         "turn_detection": {
                             "type": "server_vad",
@@ -489,8 +542,9 @@ class _realtime_api_class:
                     threading.Thread(target=self.send_audio_from_queue, daemon=True),
                     threading.Thread(target=self.output_audio_from_queue, args=(output_stream,), daemon=True),
                     threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
+                    threading.Thread(target=self.visualizer_update, daemon=True),
                     threading.Thread(target=self.receive_proc, daemon=True),
-                    threading.Thread(target=self.tools_debug, daemon=True)
+                    #threading.Thread(target=self.tools_debug, daemon=True)
                 ]
 
                 for thread in threads:
@@ -498,23 +552,11 @@ class _realtime_api_class:
 
             # 待機
             while (not self.break_flag):
-                if not self.graph_input_queue.empty():
-                    input_data = self.graph_input_queue.get()
-                    self.visualizer.update_graph(input_chunk=input_data)
-                else:
-                    self.visualizer.update_graph(input_chunk=bytes(INPUT_CHUNK))
-                    
-                if not self.graph_output_queue.empty():
-                    output_data = self.graph_output_queue.get()
-                    self.visualizer.update_graph(output_chunk=output_data)
-                else:
-                    self.visualizer.update_graph(output_chunk=bytes(OUTPUT_CHUNK))
-                    
+                self.visualizer.update_graph()
                 time.sleep(0.05)
 
         except Exception as e:
             print(f"_main: {e}")
-        self.thread_break = True
 
         # 停止
         self.break_flag = True
@@ -643,7 +685,7 @@ class _visualizer_class:
         if hasattr(self, 'api_instance'):
             self.api_instance.break_flag = True
             
-    def update_graph(self, input_chunk=None, output_chunk=None):
+    def update_value(self, input_chunk=None, output_chunk=None):
         if input_chunk is not None:
             # 入力データの更新（絶対値に変換）
             input_data = np.abs(np.frombuffer(input_chunk, dtype=np.int16))
@@ -658,6 +700,7 @@ class _visualizer_class:
             self.line2.set_data(range(len(output_data)), output_data)
             self.ax2.set_xlim(0, len(output_data))
             
+    def update_graph(self):
         self.canvas.draw()
         self.root.update()
 

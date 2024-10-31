@@ -17,7 +17,7 @@ CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
 
 
-def post_request(req_mode='assistant,'):
+def post_request(req_mode='chat'):
     try:
         response = requests.post(
             f'http://localhost:{CORE_PORT}/post_req',
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     #time.sleep(60 + NUM_SUBAIS)
     while True:
-        post_request(req_mode='assistant')
+        post_request(req_mode='parallel')
         time.sleep(3)
         post_request(req_mode='chat')
         time.sleep(3)

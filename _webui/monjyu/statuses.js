@@ -12,7 +12,7 @@ function getSubAiInfo() {
                 let info = data[port];
                 let subai = $(`#subai-${port}`);
                 // ステータスに応じたクラスを追加
-                subai.removeClass('READY CHAT ASSISTANT SESSION NONE CANCEL ERROR').addClass(info.status);
+                subai.removeClass('READY CHAT SERIAL PARALLEL SESSION NONE CANCEL ERROR').addClass(info.status);
                 // upd_time 属性の設定
                 if (info.upd_time) {
                     subai.attr('data-upd-time', info.upd_time); 
@@ -53,7 +53,7 @@ function getSubAiStatuses() {
 
                 // ステータスが変更されていれば、クラスを変更し点滅アニメーションを適用
                 if (currentStatus !== info.status) {
-                    subai.removeClass('READY CHAT ASSISTANT SESSION NONE CANCEL ERROR').addClass(info.status);
+                    subai.removeClass('READY CHAT SERIAL PARALLEL SESSION NONE CANCEL ERROR').addClass(info.status);
                     
                     // upd_time 属性の設定
                     if (info.upd_time) {

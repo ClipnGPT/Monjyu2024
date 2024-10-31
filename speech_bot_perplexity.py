@@ -48,7 +48,7 @@ class _perplexityAPI:
         self.perplexity_default_class   = 'auto'
         self.perplexity_auto_continue   = 3
         self.perplexity_max_step        = 10
-        self.perplexity_max_assistant   = 5
+        self.perplexity_max_session     = 5
        
         self.perplexity_key_id          = None
 
@@ -105,7 +105,7 @@ class _perplexityAPI:
                      perplexity_api_type,
                      perplexity_default_gpt, perplexity_default_class,
                      perplexity_auto_continue,
-                     perplexity_max_step, perplexity_max_assistant,
+                     perplexity_max_step, perplexity_max_session,
 
                      perplexity_key_id,
 
@@ -127,8 +127,8 @@ class _perplexityAPI:
             self.perplexity_auto_continue   = int(perplexity_auto_continue)
         if (str(perplexity_max_step)      != 'auto'):
             self.perplexity_max_step        = int(perplexity_max_step)
-        if (str(perplexity_max_assistant) != 'auto'):
-            self.perplexity_max_assistant   = int(perplexity_max_assistant)
+        if (str(perplexity_max_session) != 'auto'):
+            self.perplexity_max_session     = int(perplexity_max_session)
 
         # perplexity チャットボット
         if (perplexity_a_nick_name != ''):
@@ -669,7 +669,7 @@ if __name__ == '__main__':
                             api_type,
                             perplexity_key.getkey('perplexity','perplexity_default_gpt'), perplexity_key.getkey('perplexity','perplexity_default_class'),
                             perplexity_key.getkey('perplexity','perplexity_auto_continue'),
-                            perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_assistant'),
+                            perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_session'),
                             perplexity_key.getkey('perplexity','perplexity_key_id'),
                             perplexity_key.getkey('perplexity','perplexity_a_nick_name'), perplexity_key.getkey('perplexity','perplexity_a_model'), perplexity_key.getkey('perplexity','perplexity_a_token'),
                             perplexity_key.getkey('perplexity','perplexity_b_nick_name'), perplexity_key.getkey('perplexity','perplexity_b_model'), perplexity_key.getkey('perplexity','perplexity_b_token'),

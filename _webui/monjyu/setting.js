@@ -12,7 +12,7 @@ function get_subai_info_all() {
                 // サブAIのポート情報を追加
                 i += 1;
                 if (i <= 20) {
-                    $('#assistant_max_ai_count').append(`<option value="${i}">${i}</option>`);
+                    $('#parallel_max_ai_count').append(`<option value="${i}">${i}</option>`);
                 }
             });
         },
@@ -24,20 +24,40 @@ function get_subai_info_all() {
 
 // モデルの情報を取得してコンボボックスを設定する関数
 function get_models() {
-    // assistant, session
+    // serial
     $.ajax({
         url: $('#core_endpoint').val() + '/get_models',
         method: 'GET',
-        data: { req_mode: 'assistant' },
+        data: { req_mode: 'serial' },
         dataType: 'json',
         async: false, // 同期処理
         success: function(data) {
             // 取得したモデルの選択肢を設定
             for (var [key, value] of Object.entries(data)) {
-                $('#assistant_req_engine').append(`<option value="${key}">${value}</option>`);
-                $('#assistant_before_engine').append(`<option value="${key}">${value}</option>`);
-                $('#assistant_after_engine').append(`<option value="${key}">${value}</option>`);
-                $('#assistant_check_engine').append(`<option value="${key}">${value}</option>`);
+                $('#serial_req_engine').append(`<option value="${key}">${value}</option>`);
+                $('#serial_before_engine').append(`<option value="${key}">${value}</option>`);
+                $('#serial_after_engine').append(`<option value="${key}">${value}</option>`);
+                $('#serial_check_engine').append(`<option value="${key}">${value}</option>`);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('get_models (serial) error:', error);
+        }
+    });
+    // parallel, session
+    $.ajax({
+        url: $('#core_endpoint').val() + '/get_models',
+        method: 'GET',
+        data: { req_mode: 'parallel' },
+        dataType: 'json',
+        async: false, // 同期処理
+        success: function(data) {
+            // 取得したモデルの選択肢を設定
+            for (var [key, value] of Object.entries(data)) {
+                $('#parallel_req_engine').append(`<option value="${key}">${value}</option>`);
+                $('#parallel_before_engine').append(`<option value="${key}">${value}</option>`);
+                $('#parallel_after_engine').append(`<option value="${key}">${value}</option>`);
+                $('#parallel_check_engine').append(`<option value="${key}">${value}</option>`);
                 $('#session_req_engine').append(`<option value="${key}">${value}</option>`);
                 $('#session_before_engine').append(`<option value="${key}">${value}</option>`);
                 $('#session_after_engine').append(`<option value="${key}">${value}</option>`);
@@ -45,7 +65,7 @@ function get_models() {
             }
         },
         error: function(xhr, status, error) {
-            console.error('get_models (assistant) error:', error);
+            console.error('get_models (parallel) error:', error);
         }
     });
     // chat, websearch, clip, voice
@@ -87,7 +107,8 @@ function set_max_retry() {
     for (var j = 1; j <= 3; j++) {
         $('#chat_max_retry').append(`<option value="${j}">${j}</option>`);
         $('#websearch_max_retry').append(`<option value="${j}">${j}</option>`);
-        $('#assistant_max_retry').append(`<option value="${j}">${j}</option>`);
+        $('#serial_max_retry').append(`<option value="${j}">${j}</option>`);
+        $('#parallel_max_retry').append(`<option value="${j}">${j}</option>`);
         $('#session_max_retry').append(`<option value="${j}">${j}</option>`);
         $('#clip_max_retry').append(`<option value="${j}">${j}</option>`);
         $('#voice_max_retry').append(`<option value="${j}">${j}</option>`);
@@ -98,7 +119,8 @@ function set_max_retry() {
 let last_mode_setting = {
     chat: null,
     websearch: null,
-    assistant: null,
+    serial: null,
+    parallel: null,
     session: null,
     clip: null,
     voice: null
@@ -109,7 +131,8 @@ let last_addins_setting = null;
 function get_mode_setting_all() {
     get_mode_setting('chat');
     get_mode_setting('websearch');
-    get_mode_setting('assistant');
+    get_mode_setting('serial');
+    get_mode_setting('parallel');
     get_mode_setting('session');
     get_mode_setting('clip');
     get_mode_setting('voice');
@@ -161,21 +184,39 @@ function get_mode_setting(req_mode) {
                 }    
             }
 
-            // assistant
-            if (req_mode === 'assistant') {
-                if (JSON.stringify(data) !== last_mode_setting.assistant) {
-                    $('#assistant_req_engine').val(data.req_engine || '');
-                    $('#assistant_req_functions').val(data.req_functions || '');
-                    $('#assistant_req_reset').val(data.req_reset || '');
-                    $('#assistant_max_retry').val(data.max_retry || '');
-                    $('#assistant_max_ai_count').val(data.max_ai_count || '');
-                    $('#assistant_before_proc').val(data.before_proc || '');
-                    $('#assistant_before_engine').val(data.before_engine || '');
-                    $('#assistant_after_proc').val(data.after_proc || '');
-                    $('#assistant_after_engine').val(data.after_engine || '');
-                    $('#assistant_check_proc').val(data.check_proc || '');
-                    $('#assistant_check_engine').val(data.check_engine || '');
-                    last_mode_setting.assistant = JSON.stringify(data);
+            // serial
+            if (req_mode === 'serial') {
+                if (JSON.stringify(data) !== last_mode_setting.serial) {
+                    $('#serial_req_engine').val(data.req_engine || '');
+                    $('#serial_req_functions').val(data.req_functions || '');
+                    $('#serial_req_reset').val(data.req_reset || '');
+                    $('#serial_max_retry').val(data.max_retry || '');
+                    $('#serial_max_ai_count').val(data.max_ai_count || '');
+                    $('#serial_before_proc').val(data.before_proc || '');
+                    $('#serial_before_engine').val(data.before_engine || '');
+                    $('#serial_after_proc').val(data.after_proc || '');
+                    $('#serial_after_engine').val(data.after_engine || '');
+                    $('#serial_check_proc').val(data.check_proc || '');
+                    $('#serial_check_engine').val(data.check_engine || '');
+                    last_mode_setting.serial = JSON.stringify(data);
+                }    
+            }
+
+            // parallel
+            if (req_mode === 'parallel') {
+                if (JSON.stringify(data) !== last_mode_setting.parallel) {
+                    $('#parallel_req_engine').val(data.req_engine || '');
+                    $('#parallel_req_functions').val(data.req_functions || '');
+                    $('#parallel_req_reset').val(data.req_reset || '');
+                    $('#parallel_max_retry').val(data.max_retry || '');
+                    $('#parallel_max_ai_count').val(data.max_ai_count || '');
+                    $('#parallel_before_proc').val(data.before_proc || '');
+                    $('#parallel_before_engine').val(data.before_engine || '');
+                    $('#parallel_after_proc').val(data.after_proc || '');
+                    $('#parallel_after_engine').val(data.after_engine || '');
+                    $('#parallel_check_proc').val(data.check_proc || '');
+                    $('#parallel_check_engine').val(data.check_engine || '');
+                    last_mode_setting.parallel = JSON.stringify(data);
                 }    
             }
 
@@ -280,21 +321,39 @@ function post_mode_setting(req_mode) {
         };
     }
 
-    // assistant
-    if (req_mode === 'assistant') {
+    // serial
+    if (req_mode === 'serial') {
         formData = {
             req_mode: req_mode,
-            req_engine: $('#assistant_req_engine').val(),
-            req_functions: $('#assistant_req_functions').val(),
-            req_reset: $('#assistant_req_reset').val(),
-            max_retry: $('#assistant_max_retry').val(),
-            max_ai_count: $('#assistant_max_ai_count').val(),
-            before_proc: $('#assistant_before_proc').val(),
-            before_engine: $('#assistant_before_engine').val(),
-            after_proc: $('#assistant_after_proc').val(),
-            after_engine: $('#assistant_after_engine').val(),
-            check_proc: $('#assistant_check_proc').val(),
-            check_engine: $('#assistant_check_engine').val()
+            req_engine: $('#serial_req_engine').val(),
+            req_functions: $('#serial_req_functions').val(),
+            req_reset: $('#serial_req_reset').val(),
+            max_retry: $('#serial_max_retry').val(),
+            max_ai_count: $('#serial_max_ai_count').val(),
+            before_proc: $('#serial_before_proc').val(),
+            before_engine: $('#serial_before_engine').val(),
+            after_proc: $('#serial_after_proc').val(),
+            after_engine: $('#serial_after_engine').val(),
+            check_proc: $('#serial_check_proc').val(),
+            check_engine: $('#serial_check_engine').val()
+        };
+    }
+
+    // parallel
+    if (req_mode === 'parallel') {
+        formData = {
+            req_mode: req_mode,
+            req_engine: $('#parallel_req_engine').val(),
+            req_functions: $('#parallel_req_functions').val(),
+            req_reset: $('#parallel_req_reset').val(),
+            max_retry: $('#parallel_max_retry').val(),
+            max_ai_count: $('#parallel_max_ai_count').val(),
+            before_proc: $('#parallel_before_proc').val(),
+            before_engine: $('#parallel_before_engine').val(),
+            after_proc: $('#parallel_after_proc').val(),
+            after_engine: $('#parallel_after_engine').val(),
+            check_proc: $('#parallel_check_proc').val(),
+            check_engine: $('#parallel_check_engine').val()
         };
     }
 
@@ -444,13 +503,22 @@ function chat_set_engine(engine) {
     post_mode_setting('voice');
 }
 
-// assistant-engineのセット
-function assistant_set_engine(engine) {
-        $('#assistant_req_engine').val(engine);
-        $('#assistant_before_engine').val(engine);
-        $('#assistant_after_engine').val(engine);
-        $('#assistant_check_engine').val(engine);
-        post_mode_setting('assistant');
+// serial-engineのセット
+function serial_set_engine(engine) {
+        $('#serial_req_engine').val(engine);
+        $('#serial_before_engine').val(engine);
+        $('#serial_after_engine').val(engine);
+        $('#serial_check_engine').val(engine);
+        post_mode_setting('serial');
+}
+
+// parallel-engineのセット
+function parallel_set_engine(engine) {
+        $('#parallel_req_engine').val(engine);
+        $('#parallel_before_engine').val(engine);
+        $('#parallel_after_engine').val(engine);
+        $('#parallel_check_engine').val(engine);
+        post_mode_setting('parallel');
         $('#session_req_engine').val(engine);
         $('#session_before_engine').val(engine);
         $('#session_after_engine').val(engine);
@@ -530,11 +598,17 @@ $(document).ready(function() {
     $('#websearch_before_proc, #websearch_before_engine, #websearch_after_proc, #websearch_after_engine, #websearch_check_proc, #websearch_check_engine').change(function() {
         post_mode_setting('websearch');
     });
-    $('#assistant_req_engine, #assistant_req_functions, #assistant_req_reset, #assistant_max_retry, #assistant_max_ai_count').change(function() {
-        post_mode_setting('assistant');
+    $('#serial_req_engine, #serial_req_functions, #serial_req_reset, #serial_max_retry, #serial_max_ai_count').change(function() {
+        post_mode_setting('serial');
     });
-    $('#assistant_before_proc, #assistant_before_engine, #assistant_after_proc, #assistant_after_engine, #assistant_check_proc, #assistant_check_engine').change(function() {
-        post_mode_setting('assistant');
+    $('#serial_before_proc, #serial_before_engine, #serial_after_proc, #serial_after_engine, #serial_check_proc, #serial_check_engine').change(function() {
+        post_mode_setting('serial');
+    });
+    $('#parallel_req_engine, #parallel_req_functions, #parallel_req_reset, #parallel_max_retry, #parallel_max_ai_count').change(function() {
+        post_mode_setting('parallel');
+    });
+    $('#parallel_before_proc, #parallel_before_engine, #parallel_after_proc, #parallel_after_engine, #parallel_check_proc, #parallel_check_engine').change(function() {
+        post_mode_setting('parallel');
     });
     $('#session_req_engine, #session_req_functions, #session_req_reset, #session_max_retry, #session_max_ai_count').change(function() {
         post_mode_setting('session');
@@ -591,15 +665,26 @@ $(document).ready(function() {
         chat_set_engine('gpt');
     });
 
-    // assistant-engineボタンのクリックイベント
-    $('#assistant-auto').click(function() {
-        assistant_set_engine('');
+    // serial-engineボタンのクリックイベント
+    $('#serial-auto').click(function() {
+        serial_set_engine('');
     });
-    $('#assistant-flash').click(function() {
-        assistant_set_engine('f-flash');
+    $('#serial-flash').click(function() {
+        serial_set_engine('f-flash');
     });
-    $('#assistant-plamo').click(function() {
-        assistant_set_engine('plamo');
+    $('#serial-plamo').click(function() {
+        serial_set_engine('plamo');
+    });
+
+    // parallel-engineボタンのクリックイベント
+    $('#parallel-auto').click(function() {
+        parallel_set_engine('');
+    });
+    $('#parallel-flash').click(function() {
+        parallel_set_engine('f-flash');
+    });
+    $('#parallel-plamo').click(function() {
+        parallel_set_engine('plamo');
     });
     
     $('#react-halloWorld').click(function() {

@@ -50,7 +50,7 @@ class _claudeAPI:
         self.claude_default_class   = 'auto'
         self.claude_auto_continue   = 3
         self.claude_max_step        = 10
-        self.claude_max_assistant   = 5
+        self.claude_max_session     = 5
        
         self.claude_key_id          = None
 
@@ -107,7 +107,7 @@ class _claudeAPI:
                      claude_api_type,
                      claude_default_gpt, claude_default_class,
                      claude_auto_continue,
-                     claude_max_step, claude_max_assistant,
+                     claude_max_step, claude_max_session,
 
                      claude_key_id,
 
@@ -129,8 +129,8 @@ class _claudeAPI:
             self.claude_auto_continue = int(claude_auto_continue)
         if (str(claude_max_step)      != 'auto'):
             self.claude_max_step      = int(claude_max_step)
-        if (str(claude_max_assistant) != 'auto'):
-            self.claude_max_assistant = int(claude_max_assistant)
+        if (str(claude_max_session) != 'auto'):
+            self.claude_max_session   = int(claude_max_session)
 
         # claude チャットボット
         if (claude_a_nick_name != ''):
@@ -812,7 +812,7 @@ if __name__ == '__main__':
                             api_type,
                             claude_key.getkey('claude','claude_default_gpt'), claude_key.getkey('claude','claude_default_class'),
                             claude_key.getkey('claude','claude_auto_continue'),
-                            claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_assistant'),
+                            claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_session'),
                             claude_key.getkey('claude','claude_key_id'),
                             claude_key.getkey('claude','claude_a_nick_name'), claude_key.getkey('claude','claude_a_model'), claude_key.getkey('claude','claude_a_token'),
                             claude_key.getkey('claude','claude_b_nick_name'), claude_key.getkey('claude','claude_b_model'), claude_key.getkey('claude','claude_b_token'),

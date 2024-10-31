@@ -247,7 +247,7 @@ class CoreAiClass:
 
         with self.thread_lock:
             ready_count = sum(1 for info in self.data.subai_info.values() if info['status'] == 'READY')
-            busy_count = sum(1 for info in self.data.subai_info.values() if info['status'] in ['BUSY', 'ASSISTANT', 'CHAT'])
+            busy_count = sum(1 for info in self.data.subai_info.values() if info['status'] in ['BUSY', 'SERIAL', 'PARALLEL', 'CHAT'])
         res = {'ready_count': ready_count, 'busy_count': busy_count}
         return JSONResponse(content=res)
 
@@ -660,7 +660,7 @@ class CoreAiClass:
 
         # 開始
         with self.thread_lock:
-            key_val = f"{user_id}/{from_port}/{to_port}"
+            key_val = f"{user_id}:{from_port}:{to_port}"
             now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
             self.data.subai_sessions_all[key_val] = {
                 "key_val": key_val,
@@ -791,7 +791,7 @@ class CoreAiClass:
             if response.status_code == 200:
                 with self.thread_lock:
                     self.data.subai_reset[to_port]['reset'] = ''
-                    if (req_mode not in ['assistant', 'session']):
+                    if (req_mode not in ['serial', 'parallel', 'session']):
                         self.data.subai_info[to_port]['status'] = 'CHAT'
                     else:
                         self.data.subai_info[to_port]['status'] = req_mode.upper()
@@ -928,7 +928,7 @@ class CoreAiClass:
                             "out_time": now_time, "out_text": output_text, "out_data": output_data,
                             "status": status,
                             "upd_time": now_time, "dsp_time": None, }
-                    if (req_mode in ['chat', 'websearch', 'assistant']):
+                    if (req_mode in ['chat', 'websearch', 'serial', 'parallel']):
                         self.data.subai_output_log_key += 1
                         self.data.subai_output_log_all[self.data.subai_output_log_key] = {
                                 "key_val": key_val,

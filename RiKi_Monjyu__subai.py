@@ -238,7 +238,7 @@ class SubAiClass:
         if from_port != self.last_session:
             if self.info['status'] != 'READY':
                 raise HTTPException(status_code=400, detail='Not available')
-        if (req_mode not in ['assistant', 'session']):
+        if (req_mode not in ['serial', 'parallel', 'session']):
             self.info['status'] = 'CHAT'
         else:
             self.info['status'] = req_mode.upper()
@@ -258,7 +258,7 @@ class SubAiClass:
                 if module_dic['onoff'] == 'on':
                     self.function_modules.append(module_dic)
         # チャット処理開始
-        if req_mode != 'assistant':
+        if req_mode not in ['serial', 'parallel']:
             thread = threading.Thread(target=self.chat_proc, 
                                       args=(user_id, from_port, to_port, 
                                             req_mode, req_engine,

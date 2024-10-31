@@ -129,7 +129,16 @@ class _data_class:
             self.mode_setting['chat']['check_engine'] = ''
             self.mode_setting['websearch']['check_engine'] = ''
 
-        self.mode_setting['assistant'] = {
+        self.mode_setting['serial'] = {
+            "req_engine": "", 
+            "req_functions": "", "req_reset": "",
+            "max_retry": "", "max_ai_count": "",
+            "before_proc": "", "before_engine": "",
+            "after_proc": "", "after_engine": "",
+            "check_proc": "", "check_engine": ""
+        }
+
+        self.mode_setting['parallel'] = {
             "req_engine": "", 
             "req_functions": "", "req_reset": "",
             "max_retry": "", "max_ai_count": "",
@@ -243,7 +252,7 @@ class _data_class:
     def cancel(self, user_id: str, ):
         # サブAI CANCEL 処理
         for port in self.subai_ports:
-            if self.subai_info[port]['status'] in ['ASSISTANT', 'CHAT', 'SESSION']:
+            if self.subai_info[port]['status'] in ['SERIAL', 'PARALLEL', 'CHAT', 'SESSION']:
                 thread = threading.Thread(target=self._send_cancel, args=(user_id, port,), daemon=True, )
                 thread.start()
         return True

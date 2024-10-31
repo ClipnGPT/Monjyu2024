@@ -102,8 +102,7 @@ CORE_PORT = 8000
 SUB_BASE  = 8100
 
 # 実行モードの設定
-#runMode = 'debug'
-runMode = 'assistant'
+runMode = 'debug'
 numSubAIs = '48'
 if getattr(sys, 'frozen', False):
     numSubAIs = '128'

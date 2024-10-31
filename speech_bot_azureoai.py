@@ -370,7 +370,7 @@ class AzureOaiAPI:
         self.default_class          = 'auto'
         self.auto_continue          = 3
         self.max_step               = 10
-        self.max_assistant          = 5
+        self.max_session            = 5
 
         self.client_ab              = None
         self.client_v               = None
@@ -456,7 +456,7 @@ class AzureOaiAPI:
                      openai_api_type,
                      openai_default_gpt, openai_default_class,
                      openai_auto_continue,
-                     openai_max_step, openai_max_assistant,
+                     openai_max_step, openai_max_session,
 
                      openai_organization, openai_key_id,
                      azure_endpoint, azure_version, azure_key_id,
@@ -494,8 +494,8 @@ class AzureOaiAPI:
             self.auto_continue      = int(openai_auto_continue)
         if (str(openai_max_step)      != 'auto'):
             self.max_step           = int(openai_max_step)
-        if (str(openai_max_assistant) != 'auto'):
-            self.max_assistant      = int(openai_max_assistant)
+        if (str(openai_max_session) != 'auto'):
+            self.max_session        = int(openai_max_session)
 
         self.client_ab              = None
         self.client_v               = None
@@ -1169,6 +1169,7 @@ class AzureOaiAPI:
 
                 # o1 モデルは、functions,files 未対応
                 if (res_api.lower()[:2] == 'o1'):
+                    stream = False
                     functions = []
                     if (len(msg) > 0):
                         if (msg[0]['role'] == 'system'):
@@ -1935,8 +1936,8 @@ class AzureOaiAPI:
             if (my_assistant_id is None):
 
                 # アシスタント削除
-                if (self.max_assistant > 0) and (len(assistants.data) > 0):
-                    for a in range(self.max_assistant -1 , len(assistants.data)):
+                if (self.max_session > 0) and (len(assistants.data) > 0):
+                    for a in range(self.max_session -1 , len(assistants.data)):
                         assistant = assistants.data[a]
                         if (assistant.name != my_assistant_name):
                             self.print(session_id, f" Assistant : Delete assistant_name = '{ assistant.name }',")
@@ -2647,6 +2648,8 @@ Respond according to the following criteria:
             print(e)
 
         # チャットクラス 指定
+        if (self.gpt_a_nick_name.lower()[:2] == 'o1'):
+            chat_class = 'chat'
         if (chat_class == 'auto'):
             if (self.gpt_a_nick_name != ''):
                 if (inpText.strip()[:len(self.gpt_a_nick_name)+1].lower() == (self.gpt_a_nick_name.lower() + ',')):
@@ -2745,7 +2748,7 @@ if __name__ == '__main__':
                             api_type,
                             azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
                             azureoai_key.getkey('chatgpt','openai_auto_continue'),
-                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_session'),
                             azureoai_key.getkey('chatgpt','openai_organization'), azureoai_key.getkey('chatgpt','openai_key_id'),
                             azureoai_key.getkey('chatgpt','azure_endpoint'), azureoai_key.getkey('chatgpt','azure_version'), azureoai_key.getkey('chatgpt','azure_key_id'),
                             azureoai_key.getkey('chatgpt','gpt_a_nick_name'),
@@ -2768,7 +2771,7 @@ if __name__ == '__main__':
                             api_type,
                             azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
                             azureoai_key.getkey('chatgpt','openai_auto_continue'),
-                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_session'),
                             azureoai_key.getkey('chatgpt','openai_organization'), azureoai_key.getkey('chatgpt','openai_key_id'),
                             azureoai_key.getkey('chatgpt','azure_endpoint'), azureoai_key.getkey('chatgpt','azure_version'), azureoai_key.getkey('chatgpt','azure_key_id'),
                             azureoai_key.getkey('chatgpt','azure_a_nick_name'),
@@ -2792,19 +2795,19 @@ if __name__ == '__main__':
             function_modules = []
             filePath         = []
 
-            if True:
-                import    speech_bot_function
-                botFunc = speech_bot_function.botFunction()
-
-                res, msg = botFunc.functions_load(
-                    functions_path='_extensions/function/', secure_level='low', )
-                if (res != True) or (msg != ''):
-                    print(msg)
-                    print()
-
-                for module_dic in botFunc.function_modules:
-                    if (module_dic['onoff'] == 'on'):
-                        function_modules.append(module_dic)
+            #if True:
+            #    import    speech_bot_function
+            #    botFunc = speech_bot_function.botFunction()
+            #
+            #    res, msg = botFunc.functions_load(
+            #        functions_path='_extensions/function/', secure_level='low', )
+            #    if (res != True) or (msg != ''):
+            #        print(msg)
+            #        print()
+            #
+            #    for module_dic in botFunc.function_modules:
+            #        if (module_dic['onoff'] == 'on'):
+            #            function_modules.append(module_dic)
 
             if True:
                 sysText = None
@@ -2816,7 +2819,7 @@ if __name__ == '__main__':
                 print()
                 res_text, res_path, res_files, res_name, res_api, azureAPI.history = \
                     azureAPI.chatBot(  chat_class='chat', model_select='auto', 
-                                        session_id='guest1', history=azureAPI.history, function_modules=function_modules,
+                                        session_id='admin', history=azureAPI.history, function_modules=function_modules,
                                         sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                         inpLang='ja', outLang='ja', )
                 print()

@@ -51,7 +51,7 @@ class _geminiAPI:
         self.gemini_default_class   = 'auto'
         self.gemini_auto_continue   = 3
         self.gemini_max_step        = 10
-        self.gemini_max_assistant   = 5
+        self.gemini_max_session     = 5
        
         self.gemini_key_id          = None
 
@@ -114,7 +114,7 @@ class _geminiAPI:
                      gemini_api_type,
                      gemini_default_gpt, gemini_default_class,
                      gemini_auto_continue,
-                     gemini_max_step, gemini_max_assistant,
+                     gemini_max_step, gemini_max_session,
 
                      gemini_key_id,
 
@@ -136,8 +136,8 @@ class _geminiAPI:
             self.gemini_auto_continue = int(gemini_auto_continue)
         if (str(gemini_max_step)      != 'auto'):
             self.gemini_max_step      = int(gemini_max_step)
-        if (str(gemini_max_assistant) != 'auto'):
-            self.gemini_max_assistant = int(gemini_max_assistant)
+        if (str(gemini_max_session) != 'auto'):
+            self.gemini_max_session   = int(gemini_max_session)
 
         # gemini チャットボット
         if (gemini_a_nick_name != ''):
@@ -912,7 +912,7 @@ if __name__ == '__main__':
                             api_type,
                             gemini_key.getkey('gemini','gemini_default_gpt'), gemini_key.getkey('gemini','gemini_default_class'),
                             gemini_key.getkey('gemini','gemini_auto_continue'),
-                            gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_assistant'),
+                            gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_session'),
                             gemini_key.getkey('gemini','gemini_key_id'),
                             gemini_key.getkey('gemini','gemini_a_nick_name'), gemini_key.getkey('gemini','gemini_a_model'), gemini_key.getkey('gemini','gemini_a_token'),
                             gemini_key.getkey('gemini','gemini_b_nick_name'), gemini_key.getkey('gemini','gemini_b_model'), gemini_key.getkey('gemini','gemini_b_token'),

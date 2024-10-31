@@ -51,7 +51,7 @@ class _ollamaAPI:
         self.ollama_default_class   = 'auto'
         self.ollama_auto_continue   = 3
         self.ollama_max_step        = 10
-        self.ollama_max_assistant   = 5
+        self.ollama_max_session     = 5
        
         self.ollama_server          = 'localhost'
         self.ollama_port            = '11434'
@@ -109,7 +109,7 @@ class _ollamaAPI:
                      ollama_api_type,
                      ollama_default_gpt, ollama_default_class,
                      ollama_auto_continue,
-                     ollama_max_step, ollama_max_assistant,
+                     ollama_max_step, ollama_max_session,
 
                      ollama_server, ollama_port,
 
@@ -128,8 +128,8 @@ class _ollamaAPI:
             self.ollama_auto_continue = int(ollama_auto_continue)
         if (str(ollama_max_step)      != 'auto'):
             self.ollama_max_step      = int(ollama_max_step)
-        if (str(ollama_max_assistant) != 'auto'):
-            self.ollama_max_assistant = int(ollama_max_assistant)
+        if (str(ollama_max_session) != 'auto'):
+            self.ollama_max_session   = int(ollama_max_session)
 
         # ollama サーバー
         if (str(ollama_server) != 'auto'):
@@ -767,7 +767,7 @@ if __name__ == '__main__':
                             api_type,
                             ollama_key.getkey('ollama','ollama_default_gpt'), ollama_key.getkey('ollama','ollama_default_class'),
                             ollama_key.getkey('ollama','ollama_auto_continue'),
-                            ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_assistant'),
+                            ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_session'),
                             ollama_key.getkey('ollama','ollama_server'), ollama_key.getkey('ollama','ollama_port'),
                             ollama_key.getkey('ollama','ollama_a_nick_name'), ollama_key.getkey('ollama','ollama_a_model'), ollama_key.getkey('ollama','ollama_a_token'),
                             ollama_key.getkey('ollama','ollama_b_nick_name'), ollama_key.getkey('ollama','ollama_b_model'), ollama_key.getkey('ollama','ollama_b_token'),

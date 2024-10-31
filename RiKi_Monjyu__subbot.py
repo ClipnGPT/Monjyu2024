@@ -137,7 +137,7 @@ class ChatClass:
                             api_type,
                             freeai_key.getkey('freeai','freeai_default_gpt'), freeai_key.getkey('freeai','freeai_default_class'),
                             freeai_key.getkey('freeai','freeai_auto_continue'),
-                            freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_assistant'),
+                            freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_session'),
                             key_id,
                             freeai_key.getkey('freeai','freeai_a_nick_name'), freeai_key.getkey('freeai','freeai_a_model'), freeai_key.getkey('freeai','freeai_a_token'),
                             freeai_key.getkey('freeai','freeai_b_nick_name'), freeai_key.getkey('freeai','freeai_b_model'), freeai_key.getkey('freeai','freeai_b_token'),
@@ -174,7 +174,7 @@ class ChatClass:
                             api_type,
                             perplexity_key.getkey('perplexity','perplexity_default_gpt'), perplexity_key.getkey('perplexity','perplexity_default_class'),
                             perplexity_key.getkey('perplexity','perplexity_auto_continue'),
-                            perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_assistant'),
+                            perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_session'),
                             key_id,
                             perplexity_key.getkey('perplexity','perplexity_a_nick_name'), perplexity_key.getkey('perplexity','perplexity_a_model'), perplexity_key.getkey('perplexity','perplexity_a_token'),
                             perplexity_key.getkey('perplexity','perplexity_b_nick_name'), perplexity_key.getkey('perplexity','perplexity_b_model'), perplexity_key.getkey('perplexity','perplexity_b_token'),
@@ -226,7 +226,7 @@ class ChatClass:
                             api_type,
                             openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
                             openai_key.getkey('chatgpt','openai_auto_continue'),
-                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
+                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_session'),
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
                             openai_key.getkey('chatgpt','gpt_a_nick_name'),
@@ -249,7 +249,7 @@ class ChatClass:
                             api_type,
                             openai_key.getkey('chatgpt','openai_default_gpt'), openai_key.getkey('chatgpt','openai_default_class'),
                             openai_key.getkey('chatgpt','openai_auto_continue'),
-                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_assistant'),
+                            openai_key.getkey('chatgpt','openai_max_step'), openai_key.getkey('chatgpt','openai_max_session'),
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
                             openai_key.getkey('chatgpt','azure_a_nick_name'),
@@ -312,7 +312,7 @@ class ChatClass:
                             api_type,
                             azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
                             azureoai_key.getkey('chatgpt','openai_auto_continue'),
-                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_session'),
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
                             azureoai_key.getkey('chatgpt','gpt_a_nick_name'),
@@ -335,7 +335,7 @@ class ChatClass:
                             api_type,
                             azureoai_key.getkey('chatgpt','openai_default_gpt'), azureoai_key.getkey('chatgpt','openai_default_class'),
                             azureoai_key.getkey('chatgpt','openai_auto_continue'),
-                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_assistant'),
+                            azureoai_key.getkey('chatgpt','openai_max_step'), azureoai_key.getkey('chatgpt','openai_max_session'),
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
                             azureoai_key.getkey('chatgpt','azure_a_nick_name'),
@@ -383,7 +383,7 @@ class ChatClass:
                             api_type,
                             claude_key.getkey('claude','claude_default_gpt'), claude_key.getkey('claude','claude_default_class'),
                             claude_key.getkey('claude','claude_auto_continue'),
-                            claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_assistant'),
+                            claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_session'),
                             key_id,
                             claude_key.getkey('claude','claude_a_nick_name'), claude_key.getkey('claude','claude_a_model'), claude_key.getkey('claude','claude_a_token'),
                             claude_key.getkey('claude','claude_b_nick_name'), claude_key.getkey('claude','claude_b_model'), claude_key.getkey('claude','claude_b_token'),
@@ -420,7 +420,7 @@ class ChatClass:
                             api_type,
                             gemini_key.getkey('gemini','gemini_default_gpt'), gemini_key.getkey('gemini','gemini_default_class'),
                             gemini_key.getkey('gemini','gemini_auto_continue'),
-                            gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_assistant'),
+                            gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_session'),
                             key_id,
                             gemini_key.getkey('gemini','gemini_a_nick_name'), gemini_key.getkey('gemini','gemini_a_model'), gemini_key.getkey('gemini','gemini_a_token'),
                             gemini_key.getkey('gemini','gemini_b_nick_name'), gemini_key.getkey('gemini','gemini_b_model'), gemini_key.getkey('gemini','gemini_b_token'),
@@ -460,7 +460,7 @@ class ChatClass:
                             api_type,
                             ollama_key.getkey('ollama','ollama_default_gpt'), ollama_key.getkey('ollama','ollama_default_class'),
                             ollama_key.getkey('ollama','ollama_auto_continue'),
-                            ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_assistant'),
+                            ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_session'),
                             server, port,
                             ollama_key.getkey('ollama','ollama_a_nick_name'), ollama_key.getkey('ollama','ollama_a_model'), ollama_key.getkey('ollama','ollama_a_token'),
                             ollama_key.getkey('ollama','ollama_b_nick_name'), ollama_key.getkey('ollama','ollama_b_model'), ollama_key.getkey('ollama','ollama_b_token'),
@@ -497,7 +497,7 @@ class ChatClass:
                             api_type,
                             plamo_key.getkey('plamo','plamo_default_gpt'), plamo_key.getkey('plamo','plamo_default_class'),
                             plamo_key.getkey('plamo','plamo_auto_continue'),
-                            plamo_key.getkey('plamo','plamo_max_step'), plamo_key.getkey('plamo','plamo_max_assistant'),
+                            plamo_key.getkey('plamo','plamo_max_step'), plamo_key.getkey('plamo','plamo_max_session'),
                             key_id,
                             plamo_key.getkey('plamo','plamo_a_nick_name'), plamo_key.getkey('plamo','plamo_a_model'), plamo_key.getkey('plamo','plamo_a_token'),
                             plamo_key.getkey('plamo','plamo_b_nick_name'), plamo_key.getkey('plamo','plamo_b_model'), plamo_key.getkey('plamo','plamo_b_token'),
@@ -565,10 +565,10 @@ class ChatClass:
                     results = response.json()
                     all_done = True
                     for n in range(1, len(member_port)):
-                        key = f"{user_id}/{self.self_port}/{member_port[n]}"
-                        if key in results:
-                            if results[key]["out_time"] is not None:
-                                out_text[n] = str(results[key]["out_text"])
+                        key_val = f"{ user_id }:{ self.self_port }:{ member_port[n] }"
+                        if key_val in results:
+                            if results[key_val]["out_time"] is not None:
+                                out_text[n] = str(results[key_val]["out_text"])
                             else:
                                 all_done = False
                                 break
@@ -1706,7 +1706,7 @@ $$$ inpBase2 $$$
         """
 
         # パラメータ設定
-        if (req_mode == 'assistant'):
+        if (req_mode in ['serial', 'parallel']):
             if (req_functions == ''):
                 req_functions = 'no,'
             if (max_retry == ''):
@@ -1718,6 +1718,15 @@ $$$ inpBase2 $$$
                     before_proc = 'prompt,'
             if (after_proc == ''):
                 after_proc = 'all,'
+        if (req_mode == 'serial'):
+            if (max_ai_count.isdigit()):
+                if (int(max_ai_count) != 0):
+                    pass
+                else:
+                    max_ai_count = '1'
+            else:                
+                    max_ai_count = '1'
+
         if (system_text.strip() != ''):
             system_text = system_text.rstrip() + '\n'
         if (request_text.strip() != ''):

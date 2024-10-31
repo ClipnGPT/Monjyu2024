@@ -50,7 +50,8 @@ class _conf_class:
         self.cgpt_engine_vision = 'auto'
         self.cgpt_engine_fileSearch = 'auto'
         self.cgpt_engine_webSearch = 'auto'
-        self.cgpt_engine_assistant = 'auto'
+        self.cgpt_engine_serial = 'auto'
+        self.cgpt_engine_parallel = 'auto'
 
         # APIキー関連設定
         self.openai_api_type = ''
@@ -101,7 +102,8 @@ class _conf_class:
             dic['cgpt_engine_vision'] = self.cgpt_engine_vision
             dic['cgpt_engine_fileSearch'] = self.cgpt_engine_fileSearch
             dic['cgpt_engine_webSearch'] = self.cgpt_engine_webSearch
-            dic['cgpt_engine_assistant'] = self.cgpt_engine_assistant
+            dic['cgpt_engine_serial'] = self.cgpt_engine_serial
+            dic['cgpt_engine_parallel'] = self.cgpt_engine_parallel
             dic['openai_api_type'] = self.openai_api_type
             dic['openai_organization'] = self.openai_organization
             dic['openai_key_id'] = self.openai_key_id
@@ -128,7 +130,8 @@ class _conf_class:
             self.cgpt_engine_vision = dic['cgpt_engine_vision']
             self.cgpt_engine_fileSearch = dic['cgpt_engine_fileSearch']
             self.cgpt_engine_webSearch = dic['cgpt_engine_webSearch']
-            self.cgpt_engine_assistant = dic['cgpt_engine_assistant']
+            self.cgpt_engine_serial = dic['cgpt_engine_serial']
+            self.cgpt_engine_parallel = dic['cgpt_engine_parallel']
             self.openai_api_type = dic['openai_api_type']
             self.openai_organization = dic['openai_organization']
             self.openai_key_id = dic['openai_key_id']
