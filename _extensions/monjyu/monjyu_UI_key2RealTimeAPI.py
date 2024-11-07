@@ -50,11 +50,11 @@ config_file2 = 'RiKi_ClipnGPT_key.json'
 MODEL = "gpt-4o-realtime-preview-2024-10-01"
 
 # 音声ストリーム 設定
-INPUT_CHUNK = 2400
+INPUT_CHUNK = 2000
 INPUT_RATE = 24000
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
-OUTPUT_CHUNK = 2400
+OUTPUT_CHUNK = 2000
 OUTPUT_RATE = 24000
 
 # 定数の定義
@@ -210,6 +210,7 @@ class _realtime_api_class:
         self.graph_output_queue = queue.Queue()
         self.break_flag = False
         self.ws = None
+        self.once_debug_flag = False
 
         # monjyu
         self.monjyu = _monjyu_class(runMode='assistant', )
@@ -227,11 +228,20 @@ class _realtime_api_class:
 
     def input_audio_to_queue(self, input_stream, CHUNK):
         try:
+            last_zero_count = 0
             while (not self.ws is None) and (not self.break_flag):
                 audio_data = input_stream.read(CHUNK, exception_on_overflow=False)
                 if audio_data is not None:
-                    self.audio_send_queue.put(audio_data)
-                    self.graph_input_queue.put(audio_data)
+                    input_data = np.abs(np.frombuffer(audio_data, dtype=np.int16))
+                    max_val = np.max(input_data)
+                    if max_val > 1000:
+                        self.audio_send_queue.put(audio_data)
+                        self.graph_input_queue.put(audio_data)
+                        last_zero_count = 0
+                    else:
+                        if last_zero_count < 20:
+                            last_zero_count += 1
+                            self.audio_send_queue.put(audio_data)
                 else:
                     time.sleep(0.01)
         except Exception as e:
@@ -305,7 +315,13 @@ class _realtime_api_class:
 
     def tools_debug(self):
         time.sleep(5.00)
-        self.send_request(request_text='日本の３大都市の天気？', )
+        reqText = \
+"""
+外部AI(execute_monjyu_request)を呼び出して、
+「利用できるFunctions(Tools)を報告してください」と依頼し、
+利用できる拡張ファンクションを把握し、要約して報告してください。
+"""
+        self.send_request(request_text=reqText, )
         return True
 
     def receive_proc(self):
@@ -333,14 +349,24 @@ class _realtime_api_class:
                         elif type == "response.audio_transcript.done":
                             print(f" Realtime : { transcript }")
                             try:
-                                self.monjyu.post_output_log(outText=transcript, outData=transcript)
+                                #self.monjyu.post_output_log(outText=transcript, outData=transcript)
+                                thread = threading.Thread(
+                                    target=self.monjyu.post_output_log,args=(transcript, transcript),
+                                    daemon=True
+                                )
+                                thread.start()
                             except Exception as e:
                                 print(e)
 
                         elif type == "conversation.item.input_audio_transcription.completed":
                             print(f" Audio in : { transcript }")
                             try:
-                                self.monjyu.post_input_log(reqText=transcript, inpText='')
+                                #self.monjyu.post_input_log(reqText=transcript, inpText='')
+                                thread = threading.Thread(
+                                    target=self.monjyu.post_input_log,args=(transcript, ''),
+                                    daemon=True
+                                )
+                                thread.start()
                             except Exception as e:
                                 print(e)
 
@@ -432,28 +458,22 @@ class _realtime_api_class:
 
     def visualizer_update(self):
         try:
-            while (not self.ws is None) and (not self.break_flag):
-                try:
-                    if not self.graph_input_queue.empty():
-                        input_data = self.graph_input_queue.get()
-                        self.visualizer.update_value(input_chunk=input_data)
-                    else:
-                        self.visualizer.update_value(input_chunk=bytes(INPUT_CHUNK))
-                        
-                    if not self.graph_output_queue.empty():
-                        output_data = self.graph_output_queue.get()
-                        self.visualizer.update_value(output_chunk=output_data)
-                    else:
-                        self.visualizer.update_value(output_chunk=bytes(OUTPUT_CHUNK))
+            if not self.graph_input_queue.empty():
+                input_data = self.graph_input_queue.get()
+                self.visualizer.update_value(input_chunk=input_data)
+            else:
+                self.visualizer.update_value(input_chunk=bytes(INPUT_CHUNK))
+                
+            if not self.graph_output_queue.empty():
+                output_data = self.graph_output_queue.get()
+                self.visualizer.update_value(output_chunk=output_data)
+            else:
+                self.visualizer.update_value(output_chunk=bytes(OUTPUT_CHUNK))
 
-                    #self.visualizer.update_graph()
-                except Exception as e:
-                    print(f"visualizer: {e}")
-                #time.sleep(0.01)
+            self.visualizer.update_graph()
         except Exception as e:
             print(f"visualizer_update: {e}")
             return False
-        self.break_flag = True
         return True
 
     def start(self):
@@ -494,7 +514,8 @@ class _realtime_api_class:
 あなたは美しい日本語を話す賢いアシスタントです。
 あなたはRealTimeAPIで実行中のアシスタントです。
 あなたはリアルタイム会話を中心に実行してください。
-あなた自身で回答できない場合は、全て外部AI実行ファンクション(execute_monjyu_request)を利用してしてください。
+あなた自身で回答できない場合は、外部AI(execute_monjyu_request)を呼び出すことで、
+適切なFunctions(Tools)も間接的に利用して、その結果で回答してしてください。
 """
                             break
 
@@ -539,21 +560,25 @@ class _realtime_api_class:
                 output_stream = audio_stream.open(format=FORMAT, channels=CHANNELS, rate=OUTPUT_RATE, output=True, frames_per_buffer=OUTPUT_CHUNK)
 
                 threads = [
+                    threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
                     threading.Thread(target=self.send_audio_from_queue, daemon=True),
                     threading.Thread(target=self.output_audio_from_queue, args=(output_stream,), daemon=True),
-                    threading.Thread(target=self.input_audio_to_queue, args=(input_stream, INPUT_CHUNK), daemon=True),
-                    threading.Thread(target=self.visualizer_update, daemon=True),
                     threading.Thread(target=self.receive_proc, daemon=True),
                     #threading.Thread(target=self.tools_debug, daemon=True)
                 ]
+
+                # 初回起動だけdebug実行
+                if (self.once_debug_flag == False):
+                    self.once_debug_flag = True
+                    threads.append(threading.Thread(target=self.tools_debug, daemon=True))
 
                 for thread in threads:
                     thread.start()
 
             # 待機
             while (not self.break_flag):
-                self.visualizer.update_graph()
-                time.sleep(0.05)
+                self.visualizer_update()
+                time.sleep(0.01)
 
         except Exception as e:
             print(f"_main: {e}")
@@ -569,10 +594,12 @@ class _realtime_api_class:
         self.visualizer.root.destroy()
 
         # 解放
-        input_stream.stop_stream()
-        input_stream.close()
-        output_stream.stop_stream()
-        output_stream.close()
+        if input_stream:
+            input_stream.stop_stream()
+            input_stream.close()
+        if output_stream:
+            output_stream.stop_stream()
+            output_stream.close()
         audio_stream.terminate()
         if self.ws and self.ws.connected:
             self.ws.close()
@@ -642,7 +669,7 @@ class _visualizer_class:
         
     def initialize_plot(self):
         # Matplotlibのfigure作成（サイズを512x512に修正）
-        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(5.12, 5.12))
+        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(5.12, 5.12), gridspec_kw={'hspace': 0.3})
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
@@ -673,9 +700,13 @@ class _visualizer_class:
         self.line1, = self.ax1.plot([], [], 'r', drawstyle='steps-pre')  # 赤色
         self.line2, = self.ax2.plot([], [], 'b', drawstyle='steps-pre')  # 青色
         
-        # Y軸の範囲設定（絶対値表示）
-        self.ax1.set_ylim(0, 32767)  # 16-bit audioの絶対値範囲
-        self.ax2.set_ylim(0, 32767)
+        # Y軸の範囲設定（絶対値を100分率表示）
+        self.ax1.set_ylim(0, 100)
+        self.ax2.set_ylim(0, 100)
+        
+        # Y軸のラベルを追加
+        self.ax1.set_ylabel('Level (%)', color='white')
+        self.ax2.set_ylabel('Level (%)', color='white')
         
         # データバッファ
         self.input_data = []
@@ -689,6 +720,10 @@ class _visualizer_class:
         if input_chunk is not None:
             # 入力データの更新（絶対値に変換）
             input_data = np.abs(np.frombuffer(input_chunk, dtype=np.int16))
+            # 最大値に対する100分率に変換
+            max_val = np.max(input_data)
+            if max_val > 0:  # ゼロ除算を防ぐ
+                input_data = (input_data / max_val) * 100
             self.input_data = input_data
             self.line1.set_data(range(len(input_data)), input_data)
             self.ax1.set_xlim(0, len(input_data))
@@ -696,14 +731,23 @@ class _visualizer_class:
         if output_chunk is not None:
             # 出力データの更新（絶対値に変換）
             output_data = np.abs(np.frombuffer(output_chunk, dtype=np.int16))
+            # 最大値に対する100分率に変換
+            max_val = np.max(output_data)
+            if max_val > 0:  # ゼロ除算を防ぐ
+                output_data = (output_data / max_val) * 100
             self.output_data = output_data
             self.line2.set_data(range(len(output_data)), output_data)
             self.ax2.set_xlim(0, len(output_data))
             
-    def update_graph(self):
-        self.canvas.draw()
-        self.root.update()
+        #self.update_graph()
 
+    def update_graph(self):
+        try:
+            self.canvas.draw()
+            self.root.update()
+        except:
+            pass
+            
 
 
 class _class:

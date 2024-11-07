@@ -39,7 +39,7 @@ class _monjyu_class:
         self.webui_endpoint = self.local_endpoint.replace(CORE_PORT, self.webui_port)
 
     def request(self, req_mode='chat', user_id='admin', sysText='', reqText='', inpText='', ):
-        res_port = None
+        res_port = ''
 
         # ファイル添付
         file_names = []
@@ -61,16 +61,19 @@ class _monjyu_class:
 
         # AI要求送信
         try:
+            #res_port = ''
+            res_port = CORE_PORT
             response = requests.post(
                 self.local_endpoint + '/post_req',
-                json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': CORE_PORT,
+                json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': res_port,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
                     'file_names': file_names, 'result_savepath': '', 'result_schema': '', },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
-                res_port = str(response.json()['port'])
+                if (res_port == ''):
+                    res_port = str(response.json()['port'])
             else:
                 print('error', f"Error response ({ CORE_PORT }/post_req) : {response.status_code}")
         except Exception as e:
@@ -78,7 +81,7 @@ class _monjyu_class:
 
         # AI結果受信
         res_text = ''
-        if res_port is not None:
+        if res_port != '':
             try:
 
                 # AIメンバー応答待機
@@ -168,9 +171,11 @@ class _class:
             self.runMode = runMode
 
         # 処理
-        sysText = 'あなたは美しい日本語を話す賢いアシスタントです。'
-        inpText = ''
-        resText = self.monjyu.request(req_mode='clip', user_id=userId, sysText=sysText, reqText=reqText, inpText=inpText,)
+        req_mode = 'clip'
+        sysText  = 'あなたは美しい日本語を話す賢いアシスタントです。'
+        reqText  = reqText
+        inpText  = ''
+        resText  = self.monjyu.request(req_mode=req_mode, user_id=userId, sysText=sysText, reqText=reqText, inpText=inpText,)
 
         # 戻り
         dic = {}

@@ -571,7 +571,18 @@ class _geminiAPI:
         if True:
 
             # tools
-            #tools = [{"name":'code_execution'}]
+            tools_ce = {'name': 'code_execution'}
+            tools.append(tools_ce)
+            #### tools_ws = {
+            #        'name': 'google_search_retrieval',
+            #    #    "google_search_retrieval": {
+            #    #        "dynamic_retrieval_config": {
+            #    #            "mode": "unspecified",
+            #    #            "dynamic_threshold": 0.06}                
+            #    #    }
+            #### }
+            ####tools.append(tools_ws)
+
             for module_dic in function_modules:
                 func_dic = module_dic['function']
                 func_str = json.dumps(func_dic, ensure_ascii=False, )
@@ -965,6 +976,26 @@ if __name__ == '__main__':
                 #inpText = '兵庫県三木市の天気？'
                 #inpText = 'pythonで円周率100桁算出、実行して'
                 inpText = 'flash,pythonで100/3を表示するプログラム生成して、実行して'
+                print()
+                print('[Request]')
+                print(reqText, inpText )
+                print()
+                res_text, res_path, res_files, res_name, res_api, geminiAPI.history = \
+                    geminiAPI.chatBot(  chat_class='auto', model_select='auto', 
+                                        session_id='admin', history=geminiAPI.history, function_modules=function_modules,
+                                        sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
+                                        inpLang='ja', outLang='ja', )
+                print()
+                print(f"[{ res_name }] ({ res_api })")
+                print(str(res_text))
+                print()
+
+            if True:
+                sysText = None
+                reqText = ''
+                #inpText = '兵庫県三木市の天気？'
+                #inpText = 'pythonで円周率100桁算出、実行して'
+                inpText = 'flash,株式会社A-ZiPの住所教えて'
                 print()
                 print('[Request]')
                 print(reqText, inpText )

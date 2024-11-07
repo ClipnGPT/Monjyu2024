@@ -630,6 +630,8 @@ class CoreAiClass:
             and (after_proc.find('code,'    ) < 0):
 
                 # ローカル実行
+                if (to_port is None) or (to_port == ''):
+                    to_port = from_port
                 local_bot_thread = threading.Thread(target=self._local_bot, 
                                                     args=(user_id, from_port, to_port, 
                                                     req_mode, req_engine,
@@ -657,6 +659,11 @@ class CoreAiClass:
                             req_functions: str,
                             system_text: str, request_text: str, input_text: str,
                             file_names: list[str], result_savepath: str, result_schema: str, ):
+
+        # パラメータ設定
+        if True:
+            if (req_functions == ''):
+                req_functions = 'yes,'
 
         # 開始
         with self.thread_lock:

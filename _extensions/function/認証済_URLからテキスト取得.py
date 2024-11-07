@@ -246,7 +246,10 @@ if __name__ == '__main__':
     ext = _class()
     print(ext.func_proc('{ "runMode" : "assistant" }'))
 
-    print(ext.func_proc('{ ' \
-                      + '"url_path" : "https://www.google.co.jp/"' \
-                      + ' }'))
+    #print(ext.func_proc('{ ' \
+    #                  + '"url_path" : "https://www.google.co.jp/"' \
+    #                  + ' }'))
 
+    print(ext.func_proc('{ ' \
+                      + '"url_path" : "https://ncode.syosetu.com/n4830bu/1/"' \
+                      + ' }'))
