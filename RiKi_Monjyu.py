@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------------------------
-# COPYRIGHT (C) 2014-2024 Mitsuo KONDOU.
+# COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
 # This software is released under the not MIT License.
 # Permission from the right holder is required for use.
 # https://github.com/konsan1101
@@ -39,6 +39,7 @@ import sqlalchemy
 import matplotlib
 import seaborn
 import pytesseract
+import websocket
 if (os.name == 'nt'):
     import win32clipboard
     import comtypes.client
@@ -46,6 +47,7 @@ if (os.name == 'nt'):
     import winocr
 
 # seleniumモジュールのインポート
+from selenium import webdriver
 from selenium.webdriver import Edge
 from selenium.webdriver import Chrome
 from selenium.webdriver import Firefox
@@ -53,6 +55,10 @@ from selenium.webdriver import Safari
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import webdriver_manager.chrome
+import webdriver_manager.firefox
+if (os.name == 'nt'):
+    import webdriver_manager.microsoft
 
 # PDF解析用モジュールのインポート
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -137,8 +143,8 @@ if __name__ == '__main__':
     limit_date = '{:1d}{:1d}'.format(int(float(3.0)), int(float(1.0)))
     limit_date = '{:1d}{:1d}'.format(int(float(1.0)), int(float(2.0))) + '/' + limit_date
     limit_date = '/' + limit_date
-    limit_date = '{:3d}{:1d}'.format(int(float(202.0)), int(float(5.0))) + limit_date
-    #limit_date = '2024/10/31'
+    limit_date = '{:3d}{:1d}'.format(int(float(202.0)), int(float(6.0))) + limit_date
+    #limit_date = '2026/12/31'
     dt = datetime.datetime.now()
     dateinfo_today = dt.strftime('%Y/%m/%d')
     dt = datetime.datetime.strptime(limit_date, '%Y/%m/%d') + datetime.timedelta(days=-60)

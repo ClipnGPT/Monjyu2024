@@ -1,6 +1,6 @@
 @ECHO OFF
 REM ------------------------------------------------
-REM COPYRIGHT (C) 2014-2024 Mitsuo KONDOU.
+REM COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
 REM This software is released under the MIT License.
 REM https://github.com/konsan1101
 REM Thank you for keeping the rules.
@@ -72,7 +72,9 @@ rem    python -m pip  install --upgrade jupyter
 rem    python -m pip  install --upgrade jupyter-kernel-gateway
 
     python -m pip  install --upgrade pyperclip
+    python -m pip  install --upgrade websocket
     python -m pip  install --upgrade selenium
+    python -m pip  install --upgrade webdriver-manager
     python -m pip  install --upgrade bs4
     python -m pip  install --upgrade pdfminer.six
     python -m pip  install --upgrade winocr
